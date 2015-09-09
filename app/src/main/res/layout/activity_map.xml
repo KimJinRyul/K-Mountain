@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/map_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:id="@+id/rlBtns"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:weightSum="2"
+        android:layout_alignParentBottom="true"
+        android:background="#0fff"
+        android:orientation="horizontal">
+
+        <ToggleButton
+            android:id="@+id/tbPoints"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textOn = "등산 포인트 끄기"
+            android:textOff="등산 포인트 보기"/>
+        <ToggleButton
+            android:id="@+id/tbWays"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textOn = "등산로 끄기"
+            android:textOff="등산로 보기"/>
+    </LinearLayout>
+
+</RelativeLayout>

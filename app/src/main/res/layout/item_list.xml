@@ -1,0 +1,132 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shape_card"
+    android:padding="5dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp">
+
+    <RelativeLayout
+        android:id="@+id/rlImage"
+        android:layout_width="match_parent"
+        android:layout_height="190dp"
+        android:background="#90a4ae">
+        <ImageView
+            android:id="@+id/ivImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+        <ImageView
+            android:id="@+id/ivProgress"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_autorenew_white_48dp"/>
+
+        <TextView
+            android:id="@+id/tvAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="24dp"
+            android:layout_marginBottom="8dp"
+            android:textColor="#fff9c4"
+            android:textSize="14dp"
+            android:shadowColor="#000"
+            android:shadowRadius="5"/>
+
+        <TextView
+            android:id="@+id/tvMtName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/tvAddress"
+            android:layout_marginLeft="24dp"
+            android:shadowColor="#000"
+            android:shadowRadius="5"
+            android:textColor="#fff"
+            android:textSize="26dp"
+            android:text="가지"/>
+
+        <TextView
+            android:id="@+id/tvHeight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/tvMtName"
+            android:layout_toRightOf="@id/tvMtName"
+            android:layout_marginLeft="5dp"
+            android:shadowColor="#000"
+            android:shadowRadius="5"
+            android:textColor="#bbdefb"
+            android:textSize="14dp"
+            android:text="@string/RESULT_HEIGHT"/>
+
+        <TextView
+            android:id="@+id/tvNamed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="12dp"
+            android:layout_marginTop="8dp"
+            android:shadowColor="#fff"
+            android:shadowRadius="5"
+            android:textColor="#ff5722"
+            android:textSize="16dp"
+            android:textStyle="bold"
+            android:text="@string/RESULT_ITEM_NAMED" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/llInfos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/rlImage"
+        android:padding="24dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvSubName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#616161"
+            android:textSize="14dp"/>
+
+        <TextView
+            android:id="@+id/tvSummary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#000"
+            android:textSize="12dp" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/rlBtns"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:paddingLeft="24dp"
+        android:layout_below="@id/llInfos">
+
+        <Button
+            android:id="@+id/btnDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:textColor="#ff8f00"
+            android:textSize="16dp"
+            android:text="@string/CARD_DETAIL"/>
+
+        <Button
+            android:id='@+id/btnShare'
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@id/btnDetail"
+            android:layout_marginLeft="24dp"
+            android:background="@null"
+            android:textColor="#ff8f00"
+            android:textSize="16dp"
+            android:text="@string/CARD_SHARE"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>
