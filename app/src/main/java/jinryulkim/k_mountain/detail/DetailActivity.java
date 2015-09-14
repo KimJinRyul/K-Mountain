@@ -1,6 +1,7 @@
 package jinryulkim.k_mountain.detail;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +18,7 @@ import jinryulkim.k_mountain.CommonUtils;
 import jinryulkim.k_mountain.MtInfoMgr;
 import jinryulkim.k_mountain.MtInfo_General;
 import jinryulkim.k_mountain.R;
+import jinryulkim.k_mountain.map.MapActivity;
 
 /**
  * Created by jinryulkim on 15. 9. 2..
@@ -29,6 +31,8 @@ public class DetailActivity extends Activity implements DetailAdapter.CardListen
     private PinnedHeaderListViewForDetail mPinnedHeaderListView = null;
 
     private static DetailHandler mHandler = null;
+    private MtInfo_General mMtInfo = null;
+    private int mPosition = -1;
 
     static class DetailHandler extends Handler {
         private final WeakReference<DetailActivity> mActivity;
@@ -57,15 +61,16 @@ public class DetailActivity extends Activity implements DetailAdapter.CardListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        int position = getIntent().getIntExtra(EXTRA_POSITION, -1);
-        if(MtInfoMgr.mMtInfos == null || position < 0 || position >= MtInfoMgr.mMtInfos.size())
+        mPosition = getIntent().getIntExtra(EXTRA_POSITION, -1);
+
+        if(MtInfoMgr.mMtInfos == null || mPosition < 0 || mPosition >= MtInfoMgr.mMtInfos.size())
             finish();
 
         setContentView(R.layout.activity_detail);
         mHandler = new DetailHandler(this);
 
-        MtInfo_General info = MtInfoMgr.mMtInfos.get(position);
-        mDetailAdapter = new DetailAdapter(this, info, position, this);
+        mMtInfo = MtInfoMgr.mMtInfos.get(mPosition);
+        mDetailAdapter = new DetailAdapter(this, mMtInfo, mPosition, this);
 
         mPinnedHeaderListView = (PinnedHeaderListViewForDetail)findViewById(R.id.lvDetails);
         mPinnedHeaderListView.setSmoothScrollbarEnabled(true);
@@ -80,6 +85,7 @@ public class DetailActivity extends Activity implements DetailAdapter.CardListen
                 return false;
             }
         });
+        mDetailAdapter.setPinnedHeaderListViewForDetail(mPinnedHeaderListView);
     }
 
     @Override
@@ -101,9 +107,12 @@ public class DetailActivity extends Activity implements DetailAdapter.CardListen
     }
 
     @Override
-    public void onClickShare() {
-        Toast.makeText(this, "SHARE", Toast.LENGTH_SHORT).show();
+    public void onClickMap() {
+        Intent intent = new Intent(this, MapActivity.class);
+        intent.putExtra(MapActivity.EXTRA_INFO_POS, mPosition);
+        startActivity(intent);
     }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {

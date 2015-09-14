@@ -24,17 +24,35 @@ public class MtInfo_General {
     public String high = null;            // 높이
     public String admin = null;           // 관리주체
     public String adminNum = null;        // 관리자 전화번호
-    public boolean admin_expanded = false;
+
     public String summary = null;         // 산정보 개관
-    public boolean summary_expanded = false;
     public String detail = null;          // 산정보 상세
-    public boolean detail_expanded = false;
     public ArrayList<String> imagePaths = null;  // 산이미지
     public MtInfo_Named namedInfo = null;        // 100대 명산 정보
     public CardView cardview = null;      // CardView
     public boolean animated = false;      // 최초 생성시 1번만 aniamtion
     public boolean downloaded = false;
     private boolean loading = false;
+
+    public boolean admin_expanded = false;
+    public boolean summary_expanded = false;
+    public boolean detail_expanded = false;
+    public boolean reason_expanded = false;
+    public boolean overview_expanded = false;
+    public boolean transport_expanded = false;
+    public boolean tourism_expanded = false;
+    public boolean etccource_expanded = false;
+
+    public void initExpands() {
+        admin_expanded = false;
+        summary_expanded = false;
+        detail_expanded = false;
+        reason_expanded = false;
+        overview_expanded = false;
+        transport_expanded = false;
+        tourism_expanded = false;
+        etccource_expanded = false;
+    }
 
     /**
      * File Path를 생성하여 준다.

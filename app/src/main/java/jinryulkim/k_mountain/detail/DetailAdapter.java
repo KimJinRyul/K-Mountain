@@ -20,10 +20,11 @@ public class DetailAdapter extends BaseAdapter {
     private int mPosition = 0;
     private static ImageViewerCard mImageViewerCard = null;
     private CardListener mListener = null;
+    private PinnedHeaderListViewForDetail mPHLV = null;
 
     public interface CardListener {
         void onClickBack();
-        void onClickShare();
+        void onClickMap();
     }
 
     private final static int IMAGEVIEWER = 0;
@@ -51,6 +52,13 @@ public class DetailAdapter extends BaseAdapter {
         return mImageViewerCard;
     }
     public static void removeImageViewCard() {mImageViewerCard = null;}
+    public void setPinnedHeaderListViewForDetail(PinnedHeaderListViewForDetail phlv) {
+        if(mImageViewerCard != null)
+            mImageViewerCard.setPinnedHeaderListViewForDetail(phlv);
+        else {
+            mPHLV = phlv;
+        }
+    }
 
     @Override
     public int getCount() {
@@ -74,6 +82,11 @@ public class DetailAdapter extends BaseAdapter {
                 if(position == 0) {
                     if(mImageViewerCard == null) {
                         mImageViewerCard = new ImageViewerCard(mContext, mListener);
+
+                        if(mPHLV != null) {
+                            mImageViewerCard.setPinnedHeaderListViewForDetail(mPHLV);
+                            mPHLV = null;
+                        }
 
                         int width = parent.getWidth();
                         int height = (width * 9) / 16;

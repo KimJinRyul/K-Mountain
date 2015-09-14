@@ -29,14 +29,13 @@ public class MainUICard extends View {
     private boolean mFixed = false;
     private ListAdapter.CardListener mListener;
 
-    private Rect mRect, mRectBackBtn, mRectSearchBtn;
+    private Rect mRect, mRectBackBtn;
     private Paint mPaint;
     private static Bitmap mBmpBK = null;
-    private static Drawable mDrawableBack, mDrawableBackPressed, mDrawableSearch, mDrawableSearchPressed;
+    private static Drawable mDrawableBack, mDrawableBackPressed;
 
     private final static int BTN_STATE_NOTHING = 0;
     private final static int BTN_STATE_BACK = 1;
-    private final static int BTN_STATE_SEARCH = 2;
 
     /**
      * MainUICard는 프로그램 적으로만 생성되어야 함
@@ -51,11 +50,10 @@ public class MainUICard extends View {
 
     public static void loadImages(Context context) {
         if(mBmpBK == null) {
-            mBmpBK = BitmapFactory.decodeResource(context.getResources(), R.drawable.result);
-            mDrawableBack = context.getResources().getDrawable(R.drawable.ic_arrow_back_white_48dp);
-            mDrawableBackPressed = context.getResources().getDrawable(R.drawable.ic_arrow_back_grey600_48dp);
-            mDrawableSearch = context.getResources().getDrawable(R.drawable.ic_search_white_48dp);
-            mDrawableSearchPressed = context.getResources().getDrawable(R.drawable.ic_search_grey600_48dp);
+            //mBmpBK = BitmapFactory.decodeResource(context.getResources(), R.drawable.result);
+            mBmpBK = CommonUtils.decodeSampledBitmapFromResource(context.getResources(), R.drawable.result, 640, 360);
+            mDrawableBack = context.getResources().getDrawable(R.drawable.ic_arrow_back_white);
+            mDrawableBackPressed = context.getResources().getDrawable(R.drawable.ic_arrow_back_grey600);
         }
     }
 
@@ -65,7 +63,6 @@ public class MainUICard extends View {
         mTitleHeight = 0;
         mRect = new Rect(0, 0, 0, 0);
         mRectBackBtn = new Rect(0, 0, 0, 0);
-        mRectSearchBtn = new Rect(0, 0, 0, 0);
         mPaint = new Paint();
         mPaint.setTypeface(CommonUtils.typeface);
     }
@@ -159,14 +156,11 @@ public class MainUICard extends View {
         int width = mCurrentWidth / 12;
 
         mRectBackBtn = new Rect(margin, margin, margin + width, margin + width);
-        mRectSearchBtn = new Rect(mCurrentWidth - margin - width, margin, mCurrentWidth - margin, margin + width);
 
         mFlexableHeight = mOriginHeight - (margin + width + margin);
 
         mDrawableBack.setBounds(mRectBackBtn);
         mDrawableBackPressed.setBounds(mRectBackBtn);
-        mDrawableSearch.setBounds(mRectSearchBtn);
-        mDrawableSearchPressed.setBounds(mRectSearchBtn);
 
         mFixed = true;
     }
@@ -187,17 +181,12 @@ public class MainUICard extends View {
                 mBtnState = BTN_STATE_NOTHING;
                 if(CommonUtils.isPointInRect(pt, mRectBackBtn)) {
                     mBtnState = BTN_STATE_BACK;
-                } else if(CommonUtils.isPointInRect(pt, mRectSearchBtn)){
-                    mBtnState = BTN_STATE_SEARCH;
                 }
                 break;
             case MotionEvent.ACTION_UP:
                 switch(mBtnState) {
                     case BTN_STATE_BACK:
                         mListener.onClickBack();
-                        break;
-                    case BTN_STATE_SEARCH:
-                        mListener.onClickSearch();
                         break;
                 }
                 mBtnState = BTN_STATE_NOTHING;
@@ -228,9 +217,6 @@ public class MainUICard extends View {
         // draw btns
         if(mBtnState == BTN_STATE_BACK)     mDrawableBackPressed.draw(canvas);
         else                                mDrawableBack.draw(canvas);
-
-        if(mBtnState == BTN_STATE_SEARCH)   mDrawableSearchPressed.draw(canvas);
-        else                                mDrawableSearch.draw(canvas);
 
         // draw Text
         mPaint.setColor(0xffffffff);

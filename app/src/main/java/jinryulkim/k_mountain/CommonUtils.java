@@ -1,14 +1,15 @@
 package jinryulkim.k_mountain;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import java.io.File;
@@ -19,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import jinryulkim.k_mountain.DB.NamedDBConst;
 
 /**
  * Created by jinryulkim on 15. 8. 31..
@@ -95,14 +98,6 @@ public class CommonUtils {
         File wg_mt_way_shp = new File(wg_mt_way + ".shp");
         File wg_mt_way_shx = new File(wg_mt_way + ".shx");
 
-        Log.i("jrkim", "isExistInCache");
-        Log.i("jrkim", way_point_dbf.getAbsolutePath());
-        Log.i("jrkim", way_point_shp.getAbsolutePath());
-        Log.i("jrkim", way_point_shx.getAbsolutePath());
-        Log.i("jrkim", wg_mt_way_dbf.getAbsolutePath());
-        Log.i("jrkim", wg_mt_way_shp.getAbsolutePath());
-        Log.i("jrkim", wg_mt_way_shx.getAbsolutePath());
-
         // 6개 파일이 모두 존재해야 성공
         if((way_point_dbf.exists() && way_point_dbf.length() > 0) &&
                 (way_point_shp.exists() && way_point_shp.length() > 0) &&
@@ -117,7 +112,6 @@ public class CommonUtils {
     }
 
     public static boolean unzipFromAsset(Context context, String zipPath, String dstDirPath) {
-        Log.i("jrkim", "unzipFromAsset");
         boolean bRes = false;
         if(context == null ||
                 zipPath == null || zipPath.length() <= 0 ||
@@ -151,7 +145,6 @@ public class CommonUtils {
 
     private final static int BUF_SIZE = 2048;
     public static boolean unzip(InputStream is, String dstDirPath) {
-        Log.i("jrkim", "unzip -> " + dstDirPath);
         boolean bRes = false;
         if(dirCheck(dstDirPath, "") == false)
             return bRes;
@@ -162,26 +155,18 @@ public class CommonUtils {
             ZipEntry ze = null;
             boolean bWhileFail = false;
             while((ze = zis.getNextEntry()) != null) {
-                Log.i("jrkim", "unzipping..." + ze.getName());
                 String zeName = ze.getName();
 
                 if(zeName.startsWith(".") || zeName.startsWith("_")) {
-                    Log.i("jrkim", zeName + " is by-pass");
                     continue;
                 }
 
                 if(ze.isDirectory()) {
-                    Log.i("jrkim", "이거...디렉토리임.... by-pass");
-                    /*if (dirCheck(dstDirPath, ze.getName()) == false) {
-                        bWhileFail = true;
-                        break;
-                    }*/
                     continue;
                 } else {
                     String newFilePath = dstDirPath + "/" + ze.getName();
                     String newDirPath = newFilePath.substring(0, newFilePath.lastIndexOf("/"));
 
-                    Log.i("jrkim", "새파일 나가신다..:" + newFilePath + ", newDir : " + newDirPath);
                     if(dirCheck(newDirPath, "")) {
                         File f = new File(newFilePath);
                         if (!f.exists()) {
@@ -193,9 +178,6 @@ public class CommonUtils {
                             }
                             zis.closeEntry();
                             fos.close();
-                            Log.i("jrkim", "생성:" + newFilePath);
-                        } else {
-                            Log.i("jrkim", "이미 이 파일 있는데 ?!");
                         }
                     } else {
                         bWhileFail = true;
@@ -218,23 +200,72 @@ public class CommonUtils {
         if(dirName != null && dirName.length() > 0)
             newDirPath += "/" + dirName;
 
-        Log.i("jrkim", "dirCheck:" + newDirPath);
         File f = new File(newDirPath);
         if(f.exists() == false) {
-            Log.i("jrkim", newDirPath + " 이 없엉...");
             if (f.mkdirs() == false) {
-                Log.e("jrkim", newDirPath + " 못 만듦 ㅠ_ㅠ");
                 return false;
-            } else {
-                Log.i("jrkim", newDirPath + " 새로 생성");
             }
         } else {
-            Log.i("jrkim", newDirPath + " 이미 존재.");
             if (!f.isDirectory()) {
-                Log.e("jrkim", "근데....ㅅㅂ directory가 아님....");
                 return false;
             }
         }
         return true;
+    }
+
+    public static String getDBPath(Context context) {
+        return context.getFilesDir().getAbsolutePath() + File.separator + NamedDBConst.DB_NAME;
+    }
+
+    public static String stringFromHtmlFormat(String htmlFormat) {
+        String result = htmlFormat.replaceAll("<p>", "");
+        result = result.replaceAll("<P>", "");
+        result = result.replaceAll("</p>", "");
+        result = result.replaceAll("</P>", "");
+        result = result.replaceAll("<br>", "\n");
+        result = result.replaceAll("<BR>", "\n");
+        result = result.replaceAll("&nbsp;", " ");
+        result = result.replaceAll("&lt;", "<");
+        result = result.replaceAll("&gt;", ">");
+        result = result.replaceAll("&amp;", "&");
+        result = result.replaceAll("&quot;", "\"");
+        result = result.replaceAll("&35;", "#");
+        result = result.replaceAll("&39;", "\'");
+        return result;
+    }
+
+    private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if(height > reqHeight || width > reqWidth) {
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest in SampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width
+
+            while((halfHeight / inSampleSize) > reqHeight && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+        return inSampleSize;
+    }
+
+    public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int reqWidth, int reqheight) {
+
+        // First decode with inJustDecodeBounds = true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeResource(res, resId, options);
+
+        // calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqheight);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeResource(res, resId, options);
     }
 }

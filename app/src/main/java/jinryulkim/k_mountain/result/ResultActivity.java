@@ -117,17 +117,15 @@ public class ResultActivity extends Activity implements ListAdapter.CardListener
 
     @Override
     public void onClickCard(MtInfo_General info, int position, int btnID) {
+        Intent intent = null;
         switch(btnID) {
             case CardView.BTN_ID_SEARCH_MORE:
                 searchMore();
                 break;
             case CardView.BTN_ID_DETAIL:
-                Intent intent = new Intent(this, DetailActivity.class);
+                intent = new Intent(this, DetailActivity.class);
                 intent.putExtra(DetailActivity.EXTRA_POSITION, position);
                 startActivity(intent);
-                break;
-            case CardView.BTN_ID_SHARE:
-                startActivity(new Intent(this, MapActivity.class));
                 break;
         }
     }
@@ -135,11 +133,6 @@ public class ResultActivity extends Activity implements ListAdapter.CardListener
     @Override
     public void onClickBack() {
         mHandler.sendEmptyMessage(MESSAGE_FINISH);
-    }
-
-    @Override
-    public void onClickSearch() {
-        Toast.makeText(this, "SEARCH", Toast.LENGTH_SHORT).show();
     }
 
     @Override

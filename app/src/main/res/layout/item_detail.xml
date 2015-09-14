@@ -2,13 +2,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#ffffffff"
     android:orientation="vertical">
     
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#009688">
+        android:background="#0097a7">
         <TextView
             android:id="@+id/tvName"
             android:layout_width="wrap_content"
@@ -50,23 +49,97 @@
             android:textColor="#e0e0e0"
             android:textSize="16dp" />
     </RelativeLayout>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#00796b" />
+
+    <RelativeLayout
+        android:id="@+id/rlReason"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:background="#4fc3f7">
+
+        <ImageView
+            android:id="@+id/ivIconReason"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:src="@drawable/ic_card_membership_white"/>
+
+        <ImageView
+            android:id="@+id/ivIconReasonEx"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/ic_expand_more_white"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/ivIconReason"
+            android:layout_toLeftOf="@id/ivIconReasonEx"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="30dp"
+            android:textColor="#fff"
+            android:textSize="20dp"
+            android:text="@string/NAMED_REASON"/>
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/rlReasonExpand"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ede7f6"
+        android:visibility="gone">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#e0e0e0" />
+        <TextView
+            android:id="@+id/tvReason"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="20dp"
+            android:textColor="#424242"
+            android:textSize="14dp"/>
+    </RelativeLayout>
     
     <RelativeLayout
         android:id="@+id/rlSummary"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#039be5"
-        android:visibility="gone">
+        android:layout_height="55dp"
+        android:background="#29b6f6"
+        android:visibility="visible">
+        <ImageView
+            android:id="@+id/ivIconSummary"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:src="@drawable/ic_subject_white"/>
+        <ImageView
+            android:id="@+id/ivIconSummaryEx"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/ic_expand_more_white"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="30dp"
+            android:layout_toRightOf="@id/ivIconSummary"
+            android:layout_toLeftOf="@id/ivIconSummaryEx"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
             android:layout_marginRight="30dp"
             android:textColor="#fff"
             android:textSize="20dp"
@@ -97,15 +170,31 @@
     <RelativeLayout
         android:id="@+id/rlDetail"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#0288d1"
-        android:visibility="gone">
+        android:layout_height="55dp"
+        android:background="#03a9f4"
+        android:visibility="visible">
+        <ImageView
+            android:id="@+id/ivIconDetail"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:src="@drawable/ic_terrain_white"/>
+        <ImageView
+            android:id="@+id/ivIconDetailEx"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/ic_expand_more_white"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="30dp"
+            android:layout_toRightOf="@id/ivIconDetail"
+            android:layout_toLeftOf="@id/ivIconDetailEx"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
             android:layout_marginRight="30dp"
             android:textColor="#fff"
             android:textSize="20dp"
@@ -134,17 +223,92 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/rlAdmin"
+        android:id="@+id/rlTransport"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#0277bd"
-        android:visibility="gone">
+        android:layout_height="55dp"
+        android:background="#039be5">
+
+        <ImageView
+            android:id="@+id/ivIconTransport"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:src="@drawable/ic_traffic_white"/>
+
+        <ImageView
+            android:id="@+id/ivIconTransportEx"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/ic_expand_more_white"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/ivIconTransport"
+            android:layout_toLeftOf="@id/ivIconTransportEx"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="30dp"
+            android:textColor="#fff"
+            android:textSize="20dp"
+            android:text="@string/NAMED_TRANSPORT"/>
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/rlTransportExpand"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ede7f6"
+        android:visibility="gone">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#e0e0e0" />
+        <TextView
+            android:id="@+id/tvTransport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="20dp"
+            android:textColor="#424242"
+            android:textSize="14dp"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rlAdmin"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:background="#0288d1"
+        android:visibility="visible">
+        <ImageView
+            android:id="@+id/ivIconAdmin"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:src="@drawable/ic_local_phone_white"/>
+
+        <ImageView
+            android:id="@+id/ivIconAdminEx"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/ic_expand_more_white"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/ivIconAdmin"
+            android:layout_toLeftOf="@id/ivIconAdminEx"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
             android:layout_marginRight="30dp"
             android:textColor="#fff"
             android:textSize="20dp"
@@ -181,21 +345,144 @@
             android:layout_marginBottom="20dp"
             android:textColor="#424242"
             android:textSize="14dp"/>
-
     </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/rlTourism"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:background="#0277bd">
+
+        <ImageView
+            android:id="@+id/ivIconTourism"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:src="@drawable/ic_local_library_white"/>
+
+        <ImageView
+            android:id="@+id/ivIconTourismEx"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/ic_expand_more_white"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/ivIconTourism"
+            android:layout_toLeftOf="@id/ivIconTourismEx"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="30dp"
+            android:textColor="#fff"
+            android:textSize="20dp"
+            android:text="@string/NAMED_TOURISM"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rlTourismExpand"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ede7f6"
+        android:visibility="gone">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#e0e0e0" />
+        <TextView
+            android:id="@+id/tvTourism"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="20dp"
+            android:textColor="#424242"
+            android:textSize="14dp"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rlEtcCource"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:background="#01579b">
+
+        <ImageView
+            android:id="@+id/ivIconEtcCource"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:src="@drawable/ic_directions_walk_white"/>
+
+        <ImageView
+            android:id="@+id/ivIconEtcCourceEx"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/ic_expand_more_white"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/ivIconEtcCource"
+            android:layout_toLeftOf="@id/ivIconEtcCourceEx"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="30dp"
+            android:textColor="#fff"
+            android:textSize="20dp"
+            android:text="@string/NAMED_ETCCOURCE"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rlEtcCourceExpand"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ede7f6"
+        android:visibility="gone">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#e0e0e0" />
+        <TextView
+            android:id="@+id/tvEtcCource"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="20dp"
+            android:textColor="#424242"
+            android:textSize="14dp"/>
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/rlMap"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#01579b"
-        android:visibility="gone">
+        android:layout_height="55dp"
+        android:background="#313131"
+        android:visibility="visible">
+        <ImageView
+            android:id="@+id/ivIconMap"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:src="@drawable/ic_map_white"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="30dp"
+            android:layout_toRightOf="@id/ivIconMap"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
             android:layout_marginRight="30dp"
             android:textColor="#fff"
             android:textSize="20dp"
@@ -205,17 +492,17 @@
     <RelativeLayout
         android:id="@+id/rlLast"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#b3e5fc"
+        android:layout_height="200dp"
         android:visibility="visible">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="24dp"
             android:layout_marginBottom="8dp"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
-            android:textColor="#000"
+            android:layout_centerHorizontal="true"
+            android:textColor="#fff"
+            android:shadowColor="#000"
+            android:shadowRadius="3"
             android:textSize="16dp"
             android:text="@string/DETAIL_LAST"/>
     </RelativeLayout>

@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -16,8 +18,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 
+import jinryulkim.k_mountain.DB.NamedDBConst;
 import jinryulkim.k_mountain.result.ResultActivity;
 
 public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrListener,
@@ -103,6 +110,7 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
         mHandler = new MainHandler(this);
 
         findViewById(R.id.btnSearch).setOnClickListener(this);
+        findViewById(R.id.btnInfo).setOnClickListener(this);
         ((EditText)findViewById(R.id.etSearch)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -116,6 +124,69 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
             }
         });
         showSplash();
+
+        // 100대 명산 정보가 멍청한 탓에 임시로 전부 긁어 DB 로 저장하고 자 한다.
+        //MtOpenAPIMgr.createNamedMtInfoDB(this);
+
+        // 100대 명산 정보가 멍청한 탓에 임시로 전부 긁어 DB 로 저장한 것을 빼내고자 한다.
+        /*File dbFile = getDatabasePath(NamedDBConst.DB_NAME);
+        if(dbFile.exists()) {
+            try {
+                File fDir = Environment.getExternalStorageDirectory();
+                String outputPath = fDir.getAbsolutePath() + "/" + NamedDBConst.DB_NAME;
+                Log.i("jrkim", "outputPath:" + outputPath);
+                File outputDB = new File(outputPath);
+                if (!outputDB.exists())
+                    outputDB.createNewFile();
+
+                FileInputStream fis = new FileInputStream(dbFile);
+                FileOutputStream fos = new FileOutputStream(outputDB);
+                byte[] buffer = new byte[1024];
+                int read = 0;
+                while ((read = fis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, read);
+                }
+                fis.close();
+                fos.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }*/
+
+        if(copyDBFromAssetIfNotExist() == false) {
+            Log.e("jrkim", "DB copy failed");
+        }
+    }
+
+    private boolean copyDBFromAssetIfNotExist() {
+        String dbPath = CommonUtils.getDBPath(getApplicationContext());
+        File dbFile = new File(dbPath);
+        boolean bRes = false;
+        if(dbFile.exists()) {
+            return true;
+        }
+
+        dbFile.delete();
+
+        try {
+            InputStream is = getAssets().open("db/" + NamedDBConst.DB_NAME);
+            FileOutputStream fos = new FileOutputStream(dbPath);
+
+            byte buf[] = new byte[1024];
+            int len = 0;
+            while((len = is.read(buf)) > 0) {
+                fos.write(buf, 0, len);
+            }
+            is.close();
+            fos.close();
+
+            bRes = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            bRes = false;
+        }
+
+        return bRes;
     }
 
     @Override
@@ -167,6 +238,10 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
         switch(v.getId()) {
             case R.id.btnSearch:
                 search();
+                break;
+            case R.id.btnInfo:
+                startActivity(new Intent(this, InfoActivity.class));
+                overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
                 break;
         }
     }

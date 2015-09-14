@@ -29,7 +29,6 @@ public class ListAdapter extends BaseAdapter {
         void onCardRemoved(MtInfo_General info, int position);
         void onClickCard(MtInfo_General info, int position, int btnID);
         void onClickBack();
-        void onClickSearch();
     }
 
     private CardTouchListener.CardTouchCallback mCallback = new CardTouchListener.CardTouchCallback() {

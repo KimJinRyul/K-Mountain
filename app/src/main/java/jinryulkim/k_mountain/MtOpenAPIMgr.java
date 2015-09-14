@@ -5,16 +5,20 @@ package jinryulkim.k_mountain;
  */
 
 import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
+import jinryulkim.k_mountain.DB.NamedDBConst;
+import jinryulkim.k_mountain.DB.NamedDBManager;
 import jinryulkim.k_mountain.detail.ImageViewerCard;
 import jinryulkim.k_mountain.result.MainUICard;
 
@@ -64,6 +68,7 @@ import jinryulkim.k_mountain.result.MainUICard;
  *       searchArNm : String
  *       searchMtNm : String
  *       mntNm : String      산이름
+ *       mntnCd : String     산코드
  *       areaNm : String     소재지 (지역)
  *       mntHeight : String  높이
  *       areaReason : String 특징 / 선정이유
@@ -176,10 +181,14 @@ public class MtOpenAPIMgr {
         new Thread() {
             @Override
             public void run() {
+
                 if(mListener != null)
                     mListener.onRequestGeneralMtInfoStarted();
 
                 try {
+                    NamedDBManager db = NamedDBManager.getInstance(context);
+                    db.openReadonly();
+
                     MainUICard.loadImages(context);
                     ImageViewerCard.loadImages(context);
 
@@ -243,7 +252,51 @@ public class MtOpenAPIMgr {
                             tag = xmlParser.getName();
                             if("mntInfo".equals(tag) && mtInfo != null) {
                                 // 명산인지 확인해보자.
-                                //mtInfo.namedInfo = requestNamedInfo(mtInfo.code, mtInfo.name);
+                                // mtInfo.namedInfo = requestNamedInfo(mtInfo.code, mtInfo.name);
+                                Cursor cursor = db.get(NamedDBConst.mntnCd, new String[] {mtInfo.code});
+                                if(cursor.getCount() == 0) {
+                                    mtInfo.namedInfo = null;
+                                } else {
+                                    cursor.moveToFirst();
+                                    MtInfo_Named named = new MtInfo_Named();
+                                    named.tpTitle = new ArrayList<String>();
+                                    named.tpContent = new ArrayList<String>();
+
+                                    named.name = CommonUtils.stringFromHtmlFormat(cursor.getString(cursor.getColumnIndex(NamedDBConst.mntNm)).trim());
+                                    named.sname = CommonUtils.stringFromHtmlFormat(cursor.getString(cursor.getColumnIndex(NamedDBConst.subNm)).trim());
+                                    named.code = CommonUtils.stringFromHtmlFormat(cursor.getString(cursor.getColumnIndex(NamedDBConst.mntnCd)).trim());
+                                    named.area = CommonUtils.stringFromHtmlFormat(cursor.getString(cursor.getColumnIndex(NamedDBConst.areaNm)).trim());
+                                    named.height = CommonUtils.stringFromHtmlFormat(cursor.getString(cursor.getColumnIndex(NamedDBConst.mntHeight)).trim());
+                                    named.reason = CommonUtils.stringFromHtmlFormat(cursor.getString(cursor.getColumnIndex(NamedDBConst.areaReason)).trim());
+                                    named.overview = CommonUtils.stringFromHtmlFormat(cursor.getString(cursor.getColumnIndex(NamedDBConst.overView)).trim());
+                                    named.details = CommonUtils.stringFromHtmlFormat(cursor.getString(cursor.getColumnIndex(NamedDBConst.details)).trim());
+                                    String tpTitles = CommonUtils.stringFromHtmlFormat(cursor.getString(cursor.getColumnIndex(NamedDBConst.tpTitl)).trim());
+                                    String tpContents = CommonUtils.stringFromHtmlFormat(cursor.getString(cursor.getColumnIndex(NamedDBConst.tpContent)).trim());
+
+                                    if(tpTitles.length() > 0 && tpTitles.indexOf("|") > 0) {
+                                        String [] tmp = tpTitles.split("|");
+                                        for(int k = 0; k < tmp.length; k++)
+                                            named.tpTitle.add(tmp[k]);
+                                    } else
+                                        named.tpTitle.add(tpTitles);
+
+                                    if(tpContents.length() > 0 && tpContents.indexOf("|") > 0) {
+                                        String [] tmp = tpContents.split("|");
+                                        for(int k = 0; k < tmp.length; k++)
+                                            named.tpContent.add(tmp[k]);
+                                    } else
+                                        named.tpContent.add(tpContents);
+
+                                    named.transport = CommonUtils.stringFromHtmlFormat(cursor.getString(cursor.getColumnIndex(NamedDBConst.transport)).trim());
+                                    named.tourismInfo = CommonUtils.stringFromHtmlFormat(cursor.getString(cursor.getColumnIndex(NamedDBConst.tourismInf)).trim());
+                                    named.etcCource = CommonUtils.stringFromHtmlFormat(cursor.getString(cursor.getColumnIndex(NamedDBConst.etcCourse)).trim());
+                                    named.flahsUrl = CommonUtils.stringFromHtmlFormat(cursor.getString(cursor.getColumnIndex(NamedDBConst.flashUrl)).trim());
+                                    named.videoUrl = CommonUtils.stringFromHtmlFormat(cursor.getString(cursor.getColumnIndex(NamedDBConst.videoUrl)).trim());
+
+                                    mtInfo.namedInfo = named;
+                                }
+                                cursor.close();
+
                                 mtInfo.checkDownloaded(context);
                                 MtInfoMgr.mMtInfos.add(mtInfo);
                                 mtInfo = null;
@@ -264,6 +317,7 @@ public class MtOpenAPIMgr {
                     }
                     // 새로운 Empty 추가
                     MtInfoMgr.mMtInfos.add(new MtInfo_General());
+                    db.close();
 
                     if(mListener != null)
                         mListener.onRequestGeneralMtInfoCompleted();
@@ -281,6 +335,139 @@ public class MtOpenAPIMgr {
         return requestGeneralInfo(context, 10, 1, mountainName, true);
     }
 
+    public static void createNamedMtInfoDB(final Context context) {
+        File fp = context.getDatabasePath(NamedDBConst.DB_NAME);
+        if(fp.exists())
+            fp.delete();
+
+        new Thread() {
+            @Override public void run() {
+                try {
+                    NamedDBManager db = NamedDBManager.getInstance(context);
+                    db.openWritable();
+                    MtInfo_Named mtInfo = null;
+
+                    for(int r = 1; r <= 10; r++) {
+                        String addr = NAMED_URL + "?" + KEY + NAMED_KEY +
+                                "&" + PAGEUNIT + 10 +
+                                "&" + PAGEINDEX + r +
+                        //"&" + AREANAME + URLEncoder.encode(mtName, "UTF-8");
+                                "&" + MTNAME + URLEncoder.encode("", "UTF-8");
+
+                        Log.i("jrkim", "NAMED:" + addr);
+
+                        URL url = new URL(addr);
+                        BufferedInputStream bis = new BufferedInputStream(url.openStream());
+                        XmlPullParserFactory xmlFactory = XmlPullParserFactory.newInstance();
+                        xmlFactory.setNamespaceAware(true);
+                        XmlPullParser xmlParser = xmlFactory.newPullParser();
+                        xmlParser.setInput(bis, "utf-8");
+
+                        String tag = null;
+                        String txt = null;
+                        int event_type = xmlParser.getEventType();
+                        while (event_type != XmlPullParser.END_DOCUMENT) {
+                            if (event_type == XmlPullParser.START_TAG) {
+                                tag = xmlParser.getName();
+                                //Log.i("jrkim", "start_tag:" + tag);
+                                if ("gdTrailInfo".equals(tag)) {
+                                    mtInfo = new MtInfo_Named();
+                                    mtInfo.tpTitle = new ArrayList<String>();
+                                    mtInfo.tpContent = new ArrayList<String>();
+                                }
+                            } else if (event_type == XmlPullParser.TEXT && tag != null /*&& mtInfo != null*/) {
+                                txt = xmlParser.getText();
+                                //Log.i("jrkim", "tag:" + tag + ", text:" + txt);
+                                if ("totalCnt".equals(tag)) {
+                                    int totalCtn = Integer.parseInt(txt);
+                                    Log.i("jrkim", "total Cnt : " + totalCtn);
+                                } else if ("mntnCd".equals(tag)) {
+                                    mtInfo.code = txt;
+                                    Log.i("jrkim", "mntnCd:" + txt);
+                                } else if ("mntNm".equals(tag)) {
+                                    mtInfo.name = txt;
+                                    Log.i("jrkim", "mntNm:" + txt);
+                                } else if ("subNm".equals(tag)) {
+                                    mtInfo.sname = txt;
+                                    Log.i("jrkim", "subNm:" + txt);
+                                } else if ("areaNm".equals(tag)) {
+                                    mtInfo.area = txt;
+                                    Log.i("jrkim", "areaNm:" + txt);
+                                } else if ("aeatReason".equals(tag)) {
+                                    mtInfo.reason = txt;
+                                    Log.i("jrkim", "areaReason:" + txt);
+                                } else if ("overView".equals(tag)) {
+                                    mtInfo.overview = txt;
+                                    Log.i("jrkim", "overview:" + txt);
+                                } else if ("details".equals(tag)) {
+                                    mtInfo.details = txt;
+                                    Log.i("jrkim", "details:" + txt);
+                                } else if ("tpTitl".equals(tag)) {
+                                    mtInfo.tpTitle.add(txt);
+                                } else if ("tpContent".equals(tag)) {
+                                    mtInfo.tpContent.add(txt);
+                                } else if ("transport".equals(tag)) {
+                                    mtInfo.transport = txt;
+                                    Log.i("jrkim", "transport:" + txt);
+                                } else if ("tourismInf".equals(tag)) {
+                                    mtInfo.tourismInfo = txt;
+                                    Log.i("jrkim", "tourismInfo:" + txt);
+                                } else if ("etcCourse".equals(tag)) {
+                                    mtInfo.etcCource = txt;
+                                    Log.i("jrkim", "etcCource:" + txt);
+                                } else if ("videoUrl".equals(tag)) {
+                                    mtInfo.videoUrl = txt;
+                                    Log.i("jrkim", "videourl:" + txt);
+                                } else if("flashUrl".equals(tag)) {
+                                    mtInfo.flahsUrl = txt;
+                                    Log.i("jrkim", "flashUrl:" + txt);
+                                } else if("mntHeight".equals(tag)) {
+                                    mtInfo.height = txt;
+                                    Log.i("jrkim", "mntHeight:" + txt);
+                                }
+                            } else if (event_type == XmlPullParser.END_TAG) {
+                                tag = xmlParser.getName();
+                                if ("gdTrailInfo".equals(tag) && mtInfo != null) {
+                                    // DB에 입력
+                                    String tpTitles = "", tpContent = "";
+                                    for(int i = 0; i < mtInfo.tpTitle.size(); i++) {
+                                        tpTitles += mtInfo.tpTitle.get(i) + "|";
+                                    }
+                                    if(tpTitles.length() > 0)
+                                        tpTitles = tpTitles.substring(0, tpTitles.length() - 1);
+
+                                    for(int i = 0; i < mtInfo.tpContent.size(); i++) {
+                                        tpContent += mtInfo.tpContent.get(i) + "|";
+                                    }
+                                    if(tpContent.length() > 0)
+                                        tpContent = tpContent.substring(0, tpContent.length() - 1);
+
+
+                                    Log.i("jrkim", "tpTitle:" + tpTitles);
+                                    Log.i("jrkim", "tpContent:" + tpContent);
+
+                                    db.insertDB(mtInfo.name, mtInfo.sname, mtInfo.code, mtInfo.area, mtInfo.height,
+                                            mtInfo.reason, mtInfo.overview, mtInfo.details, tpTitles, tpContent,
+                                            mtInfo.transport, mtInfo.tourismInfo, mtInfo.etcCource, mtInfo.flahsUrl, mtInfo.videoUrl);
+                                    mtInfo = null;
+                                }
+                                tag = null;
+                            }
+                            event_type = xmlParser.next();
+                        }
+                        bis.close();
+                    }
+
+                    db.close();
+
+                } catch (Exception e) {
+                  e.printStackTrace();
+                }
+
+                Log.i("jrkim", "DONE!!!!!!!!");
+            }
+        }.start();
+    }
 /*
             mntNm : String      산이름
     *       areaNm : String     소재지 (지역)
@@ -299,6 +486,8 @@ public class MtOpenAPIMgr {
         */
     private static MtInfo_Named requestNamedInfo(String code, String mtName) {
 
+        Log.i("jrkim", "requestNamedInfo-" + code + "-" + mtName);
+
         MtInfo_Named mtInfo = null;
 
         try {
@@ -309,10 +498,11 @@ public class MtOpenAPIMgr {
             String addr = NAMED_URL + "?" + KEY + NAMED_KEY +
                     "&" + PAGEUNIT + 10 +
                     "&" + PAGEINDEX + 1 +
-                    "&" + AREANAME + URLEncoder.encode(mtName, "UTF-8");
-                    //"&" + MTNAME + URLEncoder.encode(mtName, "UTF-8");
+                    //"&" + AREANAME + URLEncoder.encode(mtName, "UTF-8");
+                    "&" + MTNAME + URLEncoder.encode(mtName, "UTF-8");
 
             Log.i("jrkim", "NAMED:" + addr);
+
             URL url = new URL(addr);
             BufferedInputStream bis = new BufferedInputStream(url.openStream());
             XmlPullParserFactory xmlFactory = XmlPullParserFactory.newInstance();
@@ -326,21 +516,23 @@ public class MtOpenAPIMgr {
             while (event_type != XmlPullParser.END_DOCUMENT) {
                 if (event_type == XmlPullParser.START_TAG) {
                     tag = xmlParser.getName();
+                    Log.i("jrkim", "start_tag:" + tag);
                     if ("gdTrailInfo".equals(tag)) {
-                       /* mtInfo = new MtInfo_Named();
+                        mtInfo = new MtInfo_Named();
                         mtInfo.tpTitle = new ArrayList<String>();
-                        mtInfo.tpContent = new ArrayList<String>();*/
+                        mtInfo.tpContent = new ArrayList<String>();
                     }
                 } else if (event_type == XmlPullParser.TEXT && tag != null /*&& mtInfo != null*/) {
                     txt = xmlParser.getText();
-                    if ("totalCnt".equals(tag)) {
-                        //MtInfoMgr.totalCnt = Integer.parseInt(txt);
+                    Log.i("jrkim", "tag:" + tag + ", text:" + txt);
+                    /*if ("totalCnt".equals(tag)) {
+                        MtInfoMgr.totalCnt = Integer.parseInt(txt);
                         if(Integer.parseInt(txt) > 0) {
                             mtInfo = new MtInfo_Named();
                             break;
                         }
-                    }
-                    /*if ("mntnCd".equals(tag)) {
+                    }*/
+                    if ("mntnCd".equals(tag)) {
                         mtInfo.code = txt;
                     } else if ("mntNm".equals(tag)) {
                         mtInfo.name = txt;
@@ -366,19 +558,22 @@ public class MtOpenAPIMgr {
                         mtInfo.etcCource = txt;
                     } else if ("videoUrl".equals(tag)) {
                         mtInfo.videoUrl = txt;
-                    }*/
+                    }
                 } else if (event_type == XmlPullParser.END_TAG) {
                     tag = xmlParser.getName();
-                    /*if ("gdTrailInfo".equals(tag) && mtInfo != null) {
+                    if ("gdTrailInfo".equals(tag) && mtInfo != null) {
+                        Log.i("jrkim", "요놈이 맞는가? " + code + "vs" + mtInfo.code);
                         if(code.equals(mtInfo.code)) {
+                            Log.i("jrkim", "찾았당!!");
                             return mtInfo;
+                        } else {
+                            mtInfo = null;
                         }
-                    }*/
+                    }
                     tag = null;
                 }
                 event_type = xmlParser.next();
             }
-
             bis.close();
 
         } catch (Exception e) {

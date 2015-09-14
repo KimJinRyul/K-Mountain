@@ -22,7 +22,7 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_centerInParent="true"
-            android:src="@drawable/ic_autorenew_white_48dp"/>
+            android:src="@drawable/ic_autorenew_white"/>
 
         <TextView
             android:id="@+id/tvAddress"
@@ -115,17 +115,6 @@
             android:textColor="#ff8f00"
             android:textSize="16dp"
             android:text="@string/CARD_DETAIL"/>
-
-        <Button
-            android:id='@+id/btnShare'
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_toRightOf="@id/btnDetail"
-            android:layout_marginLeft="24dp"
-            android:background="@null"
-            android:textColor="#ff8f00"
-            android:textSize="16dp"
-            android:text="@string/CARD_SHARE"/>
 
     </RelativeLayout>
 

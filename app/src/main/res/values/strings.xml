@@ -12,6 +12,7 @@
 
     <string name="CARD_DETAIL">자세히 보기</string>
     <string name="CARD_SHARE">공유하기</string>
+    <string name="CARD_NAMED">명산 정보 보기</string>
 
     <string name="TOAST_SEARCH_NOINPUT">산 이름을 입력하세요.</string>
     <string name="TOAST_NO_RESULT">검색 결과가 없습니다.</string>
@@ -22,4 +23,19 @@
     <string name="DETAIL_ADMIN">연락처</string>
     <string name="DETAIL_MAP">지도정보 보기</string>
     <string name="DETAIL_LAST">마지막 입니다.</string>
+
+    <string name="NAMED_REASON">100대명산 선정이유</string>
+    <string name="NAMED_OVERVIEW">개관</string>
+    <string name="NAMED_DETAIL">상세정보</string>
+    <string name="NAMED_TRANSPORT">교통정보</string>
+    <string name="NAMED_TOURISM">주변 관광정보</string>
+    <string name="NAMED_ETCCOURCE">기타 코스정보</string>
+
+    <string name="DLG_GPSOFF_TITLE">위치정보를 얻을 수 없습니다.</string>
+    <string name="DLG_GPSOFF_DESCRIPTION">위치정보를 얻기 위해 위치정보 설정 화면으로 이동 하시겠습니까?</string>
+    <string name="DLG_GPSOFF_BTNNEGATIVE">사용안함</string>
+    <string name="DLG_GPSOFF_BTNPOSITIVE">설정하기</string>
+
+    <string name="MAP_MY_POINT">내 현재위치</string>
+
 </resources>

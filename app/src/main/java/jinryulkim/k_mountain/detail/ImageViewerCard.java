@@ -1,5 +1,7 @@
 package jinryulkim.k_mountain.detail;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,11 +10,10 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Message;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.View;
-import android.view.ViewConfiguration;
 
 import java.util.ArrayList;
 
@@ -31,28 +32,67 @@ public class ImageViewerCard extends View {
     private int mDeltaY;
     private int mBtnState;
     private boolean mFixed = false;
-    private Rect mRect, mRectBackBtn, mRectShareBtn;
+    private Rect mRect, mRectBackBtn, mRectMapBtn;
     private Paint mPaint;
     private ArrayList<Bitmap> mImages = new ArrayList<Bitmap>();
     private int mCurImage = 0;
     private static Bitmap mBmpBK = null;
-    private static Drawable mDrawableBack = null, mDrawableBackPressed = null, mDrawableShare = null, mDrawableSharePressed = null;
+    private static Drawable mDrawableBack = null, mDrawableMap = null;
     private DetailAdapter.CardListener mListener = null;
+    private PinnedHeaderListViewForDetail mPHLV = null;
 
     private MtInfo_General mInfo;
     private int mInfoPosition;
 
-    private VelocityTracker mVT = null;
-    private float mStartX = 0;
-    private int mSwipeDistanceDivisor = 2;
-    private boolean mSwipe = false;
-    private int mSlop;
-    private int mMinFlingVelocity, mMaxFlingVelocity;
-    private int mTranslationX = 0;
-
     private final static int BTN_STATE_NOTHING = 0;
     private final static int BTN_STATE_BACK = 1;
-    private final static int BTN_STATE_SHARE = 2;
+    private final static int BTN_STATE_MAP = 2;
+
+    private final static int MESSAGE_CHANGE_IMAGE = 1000;
+    private final static int IMAGE_CHANGE_TIME     = 3000;
+    private int mAnimCnt = 0;
+    private Handler mHandler = new Handler() {
+      @Override
+        public void handleMessage(Message msg) {
+            switch(msg.what) {
+                case MESSAGE_CHANGE_IMAGE:
+                    ValueAnimator va = ValueAnimator.ofInt(0, 255);
+                    va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                        @Override
+                        public void onAnimationUpdate(ValueAnimator animator) {
+                            mAnimCnt = (Integer) animator.getAnimatedValue();
+                            if(mPHLV != null)
+                                mPHLV.invalidate();
+                        }
+                    });
+
+                    va.addListener(new ValueAnimator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mCurImage = getNextImg();
+                            mAnimCnt = 0;
+                            if(mPHLV != null)
+                                mPHLV.invalidate();
+                            mHandler.sendEmptyMessageDelayed(MESSAGE_CHANGE_IMAGE, IMAGE_CHANGE_TIME);
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+                        }
+                    });
+                    va.start();
+                    break;
+            }
+      }
+    };
 
     public ImageViewerCard(Context context, DetailAdapter.CardListener listener) {
         super(context);
@@ -64,11 +104,13 @@ public class ImageViewerCard extends View {
     public static void loadImages(Context context) {
         if(mDrawableBack == null) {
             mBmpBK = BitmapFactory.decodeResource(context.getResources(), R.drawable.no_image);
-            mDrawableBack = context.getResources().getDrawable(R.drawable.ic_arrow_back_white_48dp);
-            mDrawableBackPressed = context.getResources().getDrawable(R.drawable.ic_arrow_back_grey600_48dp);
-            mDrawableShare = context.getResources().getDrawable(R.drawable.ic_share_white_48dp);
-            mDrawableSharePressed = context.getResources().getDrawable(R.drawable.ic_share_grey600_48dp);
+            mDrawableBack = context.getResources().getDrawable(R.drawable.ic_arrow_back_white);
+            mDrawableMap = context.getResources().getDrawable(R.drawable.ic_map_white);
         }
+    }
+
+    public void setPinnedHeaderListViewForDetail(PinnedHeaderListViewForDetail phlv) {
+        mPHLV = phlv;
     }
 
     public void setInformation(MtInfo_General info, int position) {
@@ -90,31 +132,22 @@ public class ImageViewerCard extends View {
             }
         }
 
-        Log.i("jrkim", "mImage.size():" + mImages.size());
         if(mImages.size() <= 0) {
             mImages.add(mBmpBK);
         }
-        Log.i("jrkim", "-> mImage.size():" + mImages.size());
+
+        mCurImage = 0;
+        if(mImages.size() > 1)
+            mHandler.sendEmptyMessageDelayed(MESSAGE_CHANGE_IMAGE, IMAGE_CHANGE_TIME);
     }
 
-    /*
-    private Bitmap loadBitmapWithSampling(String path, int targetW, int targetH, Bitmap.Config bmConfig) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(path, options);
-
-        int photoW = options.outWidth;
-        int photoH = options.outHeight;
-
-        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-
-        options.inPreferredConfig = bmConfig;
-        options.inJustDecodeBounds = false;
-        options.inSampleSize = scaleFactor;
-        options.inPurgeable = true;
-
-        return BitmapFactory.decodeFile(path, options);
-    }*/
+    private int getNextImg() {
+        int next = mCurImage + 1;
+        if(mImages.size() <= next) {
+            next = 0;
+        }
+        return next;
+    }
 
     private void init() {
         mOriginHeight = mOriginHeightTemp = mCurrentHeight = mCurrentWidth = mFlexableHeight = 0;
@@ -122,14 +155,9 @@ public class ImageViewerCard extends View {
         mTitleHeight = 0;
         mRect = new Rect(0, 0, 0, 0);
         mRectBackBtn = new Rect(0, 0, 0, 0);
-        mRectShareBtn = new Rect(0, 0, 0, 0);
+        mRectMapBtn = new Rect(0, 0, 0, 0);
         mPaint = new Paint();
         mPaint.setTypeface(CommonUtils.typeface);
-
-        ViewConfiguration vc = ViewConfiguration.get(mContext);
-        mSlop = vc.getScaledTouchSlop();
-        mMinFlingVelocity = vc.getScaledMinimumFlingVelocity();
-        mMaxFlingVelocity = vc.getScaledMaximumFlingVelocity();
     }
 
     @Override
@@ -191,14 +219,12 @@ public class ImageViewerCard extends View {
             int width = mCurrentWidth / 12;
 
             mRectBackBtn = new Rect(margin, margin, margin + width, margin + width);
-            mRectShareBtn = new Rect(mCurrentWidth - margin - width, margin, mCurrentWidth - margin, margin + width);
+            mRectMapBtn = new Rect(mCurrentWidth - margin - width, margin, mCurrentWidth - margin, margin +width);
 
             mFlexableHeight = mOriginHeight - (margin + width + margin);
 
             mDrawableBack.setBounds(mRectBackBtn);
-            mDrawableBackPressed.setBounds(mRectBackBtn);
-            mDrawableShare.setBounds(mRectShareBtn);
-            mDrawableSharePressed.setBounds(mRectShareBtn);
+            mDrawableMap.setBounds(mRectMapBtn);
 
             mFixed = true;
         }
@@ -211,39 +237,49 @@ public class ImageViewerCard extends View {
             return;
 
         // draw image
-        mPaint.setColor(0xff212121);
+        int bkColor = 0x00111111;
         Rect src, dst;
         if(mImages.size() > 0 && mCurImage <= mImages.size() - 1) { // 그릴 이미지가 있음
+            // 현재 이미지 그리기
             Bitmap bmpBK = mImages.get(mCurImage);
+            bkColor += (255 - mAnimCnt) << 24;
+            mPaint.setColor(bkColor);
             int curDelta = mOriginHeight - mCurrentHeight;
             int I_Delta = ((curDelta * bmpBK.getHeight()) / mOriginHeight) / 2;
             src = new Rect(0, I_Delta, bmpBK.getWidth(), bmpBK.getHeight() - I_Delta);
-            dst = new Rect(mTranslationX, 0, mCurrentWidth + mTranslationX, mCurrentHeight);
+            dst = new Rect(0, 0, mCurrentWidth, mCurrentHeight);
             canvas.drawBitmap(bmpBK, src, dst, mPaint);
+
+            if(mImages.size() > 1 && (mAnimCnt > 0 && mAnimCnt <= 255)) {   // animation 도중
+                bmpBK = mImages.get(getNextImg());
+                bkColor = 0x00111111 + (mAnimCnt << 24);
+                mPaint.setColor(bkColor);
+                I_Delta = ((curDelta * bmpBK.getHeight()) / mOriginHeight) / 2;
+                src = new Rect(0, I_Delta, bmpBK.getWidth(), bmpBK.getHeight() - I_Delta);
+                canvas.drawBitmap(bmpBK, src, dst, mPaint);
+            }
         } else {                                                  // 그릴 이미지가 없음
+            mPaint.setColor(0xff111111);
             canvas.drawRect(0, 0, mCurrentWidth, mCurrentHeight, mPaint);
         }
 
-        int bkColor = 0x00212121;
+        bkColor = 0x00212121;
         int percentage = (255 * (mOriginHeight - mCurrentHeight)) / mFlexableHeight;
         bkColor += percentage << 24;
         mPaint.setColor(bkColor);
         canvas.drawRect(0, 0, mCurrentWidth, mCurrentHeight, mPaint);
 
         // draw btns
-        if(mBtnState == BTN_STATE_BACK)     mDrawableBackPressed.draw(canvas);
-        else                                mDrawableBack.draw(canvas);
-
-        if(mBtnState == BTN_STATE_SHARE)   mDrawableSharePressed.draw(canvas);
-        else                                mDrawableShare.draw(canvas);
+        mDrawableBack.draw(canvas);
+        mDrawableMap.draw(canvas);
     }
 
     private void checkkBtnArea(Point pt) {
         mBtnState = BTN_STATE_NOTHING;
         if(CommonUtils.isPointInRect(pt, mRectBackBtn)) {
             mBtnState = BTN_STATE_BACK;
-        } else if(CommonUtils.isPointInRect(pt, mRectShareBtn)){
-            mBtnState = BTN_STATE_SHARE;
+        } else if(CommonUtils.isPointInRect(pt, mRectMapBtn)) {
+            mBtnState = BTN_STATE_MAP;
         }
     }
 
@@ -255,65 +291,22 @@ public class ImageViewerCard extends View {
         float dX;
         switch(event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mStartX = event.getRawX();
-                mVT = VelocityTracker.obtain();
-                mVT.addMovement(event);
                 checkkBtnArea(pt);
                 break;
 
             case MotionEvent.ACTION_MOVE:
                 checkkBtnArea(pt);
-                if(mVT == null)
-                    break;
-                mVT.addMovement(event);
-                dX = event.getRawX() - mStartX;
-                if(Math.abs(dX) > mSlop) {
-                    mSwipe = true;
-                }
-
-                if(mSwipe == true) {
-                    mTranslationX = (int)dX;
-                }
                 break;
             case MotionEvent.ACTION_UP:
                 switch(mBtnState) {
                     case BTN_STATE_BACK:
                         mListener.onClickBack();
                         break;
-                    case BTN_STATE_SHARE:
-                        mListener.onClickShare();
+                    case BTN_STATE_MAP:
+                        mListener.onClickMap();
                         break;
                 }
                 mBtnState = BTN_STATE_NOTHING;
-                if(mVT == null)
-                    break;
-                /*dX = event.getRawX() - mStartX;
-                mVT.addMovement(event);
-                mVT.computeCurrentVelocity(1000);
-                float vX = mVT.getXVelocity();
-                float absVX = Math.abs(vX);
-                float absVY = Math.abs(mVT.getYVelocity());
-                boolean change = false;
-                boolean next = false;
-
-                if(Math.abs(dX) > mCurrentWidth / mSwipeDistanceDivisor) {
-                    change = true;
-                    next = dX > 0;
-                } else if(mMinFlingVelocity <= absVX && absVX <= mMaxFlingVelocity && absVY < absVX) {
-                    change = (vX < 0) == (dX < 0);
-                    next = vX > 0;
-                }
-
-                if(change == true) {
-                    // next...
-                } else {
-                    // 원래자리로 돌아가자..
-                }*/
-                mVT.recycle();
-                mVT = null;
-                mTranslationX = 0;
-                mStartX = 0;
-                mSwipe = false;
                 break;
         }
         invalidate();

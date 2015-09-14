@@ -51,7 +51,6 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
 
     public final static int BTN_ID_SEARCH_MORE  = 1000;
     public final static int BTN_ID_DETAIL       = 1001;
-    public final static int BTN_ID_SHARE        = 1002;
 
     public CardView(Context context, CardTouchListener.CardTouchCallback callback) {
         super(context);
@@ -104,7 +103,7 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
         if(bImageSet == false) {
             findViewById(R.id.ivProgress).setVisibility(View.VISIBLE);
             findViewById(R.id.ivImage).setVisibility(View.GONE);
-            ((ImageView) findViewById(R.id.ivProgress)).setImageResource(R.drawable.ic_highlight_remove_white_48dp);
+            ((ImageView) findViewById(R.id.ivProgress)).setImageResource(R.drawable.ic_highlight_remove_white);
         }
     }
 
@@ -164,11 +163,10 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
                     mInfo.requestDownloadImage(mContext);
                 }
             } else {
-                ((ImageView)findViewById(R.id.ivProgress)).setImageResource(R.drawable.ic_highlight_remove_white_48dp);
+                ((ImageView)findViewById(R.id.ivProgress)).setImageResource(R.drawable.ic_highlight_remove_white);
             }
 
             findViewById(R.id.btnDetail).setOnClickListener(this);
-            findViewById(R.id.btnShare).setOnClickListener(this);
         } else {
             LayoutInflater.from(mContext).inflate(R.layout.item_empty, this);
             if(MtInfoMgr.totalCnt > MtInfoMgr.mMtInfos.size() + MtInfoMgr.deletedCnt) {
@@ -200,9 +198,6 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
         switch(v.getId()) {
             case R.id.btnDetail:
                 mCallback.onClickBtn(mInfo, mPosition, BTN_ID_DETAIL);
-                break;
-            case R.id.btnShare:
-                mCallback.onClickBtn(mInfo, mPosition, BTN_ID_SHARE);
                 break;
             case R.id.ivProgress:
                 mCallback.onClickBtn(null, -1, BTN_ID_SEARCH_MORE);
