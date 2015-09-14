@@ -3,12 +3,13 @@ package jinryulkim.k_mountain;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.os.Environment;
+
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -19,17 +20,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileInputStream;
+
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 
 import jinryulkim.k_mountain.DB.NamedDBConst;
+
 import jinryulkim.k_mountain.result.ResultActivity;
 
 public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrListener,
                                                                View.OnClickListener
 {
+    private final static String SHAREDPREFERENCE_NAME = "k_mountain";
+    private final static String SP_DBVERSION = "db_version";
+
     private final static int REQCODE_RESULT     = 10000;
     private static MainHandler mHandler = null;
 
@@ -71,7 +76,7 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
 
     private void showSearchResult(boolean success) {
         if(success) {
-            if (MtInfoMgr.totalCnt <= 0) {
+            if (MtInfoMgr.mMtInfos.size() <= 0) {
                 hideProgress();
                 Toast.makeText(this, R.string.TOAST_NO_RESULT, Toast.LENGTH_SHORT).show();
             } else {
@@ -125,8 +130,13 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
         });
         showSplash();
 
+
+
         // 100대 명산 정보가 멍청한 탓에 임시로 전부 긁어 DB 로 저장하고 자 한다.
         //MtOpenAPIMgr.createNamedMtInfoDB(this);
+
+        // 일반 산정보 1600여개를 DB로 저장하고자 한다.
+        //MtOpenAPIMgr.createGeneralMtInfoDB(this, 1);
 
         // 100대 명산 정보가 멍청한 탓에 임시로 전부 긁어 DB 로 저장한 것을 빼내고자 한다.
         /*File dbFile = getDatabasePath(NamedDBConst.DB_NAME);
@@ -148,21 +158,52 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
                 }
                 fis.close();
                 fos.close();
+                Log.i("jrkim", "DB Output :" + outputPath);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }*/
 
         if(copyDBFromAssetIfNotExist() == false) {
-            Log.e("jrkim", "DB copy failed");
+            Toast.makeText(this, getString(R.string.MAIN_FAIL_INIT), Toast.LENGTH_SHORT).show();
         }
+
+       /* try {
+            NamedDBManager db = NamedDBManager.getInstance(this);
+            db.openReadonly(CommonUtils.getDBPath(this));
+            Cursor cursor = db.getAll(NamedDBConst._GEN_TABLE);
+
+            Log.i("jrkim", "cursorSize:" + cursor.getCount());
+
+            while(cursor.moveToNext()) {
+                Log.i("jrkim", "-----------------");
+                Log.i("jrkim", "code:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.code)).trim());
+                Log.i("jrkim", "name:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.name)).trim());
+                Log.i("jrkim", "sname:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.sname)).trim());
+                Log.i("jrkim", "high:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.high)).trim());
+                Log.i("jrkim", "address:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.address)).trim());
+                Log.i("jrkim", "admin:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.admin)).trim());
+                Log.i("jrkim", "adminNum:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.adminNum)).trim());
+                Log.i("jrkim", "summary:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.summary)).trim());
+                Log.i("jrkim", "detail:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.detail)).trim());
+                Log.i("jrkim", "imagePaths:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.imagePaths)).trim());
+            }
+            cursor.close();
+
+        } catch (Exception e) {
+            Log.e("jrkim", "db...." + e.getMessage());
+        }
+        Log.i("jrkim", "DONE");*/
     }
 
     private boolean copyDBFromAssetIfNotExist() {
+        SharedPreferences sp = getSharedPreferences(SHAREDPREFERENCE_NAME, MODE_PRIVATE);
+        int dbVersion = sp.getInt(SP_DBVERSION, -1);
+
         String dbPath = CommonUtils.getDBPath(getApplicationContext());
         File dbFile = new File(dbPath);
         boolean bRes = false;
-        if(dbFile.exists()) {
+        if(dbFile.exists() && dbFile.length() > 1024 && dbVersion == NamedDBConst.DB_VERSION) {
             return true;
         }
 
@@ -179,8 +220,11 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
             }
             is.close();
             fos.close();
-
             bRes = true;
+
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putInt(SP_DBVERSION, NamedDBConst.DB_VERSION);
+            editor.commit();
         } catch (Exception e) {
             e.printStackTrace();
             bRes = false;
@@ -205,7 +249,7 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
             showProgress();
 
             MtOpenAPIMgr.setListener(this);
-            MtOpenAPIMgr.requestGeneralInfo(getApplicationContext(), mtName);
+            MtOpenAPIMgr.requestGeneralInfo(getApplicationContext(), mtName, null);
         }
     }
 

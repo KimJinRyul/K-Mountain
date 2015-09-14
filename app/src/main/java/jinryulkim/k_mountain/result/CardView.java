@@ -16,7 +16,6 @@ import android.widget.TextView;
 
 import jinryulkim.k_mountain.CardTouchListener;
 import jinryulkim.k_mountain.CommonUtils;
-import jinryulkim.k_mountain.MtInfoMgr;
 import jinryulkim.k_mountain.MtInfo_General;
 import jinryulkim.k_mountain.R;
 
@@ -51,6 +50,7 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
 
     public final static int BTN_ID_SEARCH_MORE  = 1000;
     public final static int BTN_ID_DETAIL       = 1001;
+    public final static int BTN_ID_SHARE        = 1002;
 
     public CardView(Context context, CardTouchListener.CardTouchCallback callback) {
         super(context);
@@ -155,6 +155,12 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
                 findViewById(R.id.tvNamed).setVisibility(View.GONE);
             }
 
+            if(CommonUtils.isExistInAsset(mContext, mInfo.code)) {
+                findViewById(R.id.tvMap).setVisibility(View.VISIBLE);
+            } else {
+                findViewById(R.id.tvMap).setVisibility(View.GONE);
+            }
+
             if(mInfo.imagePaths != null && mInfo.imagePaths.size() > 0) {
                 if(mInfo.downloaded == true) {
                     setDownloadedImage();
@@ -167,17 +173,18 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
             }
 
             findViewById(R.id.btnDetail).setOnClickListener(this);
+            findViewById(R.id.btnShare).setOnClickListener(this);
         } else {
             LayoutInflater.from(mContext).inflate(R.layout.item_empty, this);
-            if(MtInfoMgr.totalCnt > MtInfoMgr.mMtInfos.size() + MtInfoMgr.deletedCnt) {
+            /*if(MtInfoMgr.totalCnt > MtInfoMgr.mMtInfos.size() + MtInfoMgr.deletedCnt) {
                 findViewById(R.id.ivProgress).setVisibility(View.VISIBLE);
                 findViewById(R.id.ivProgress).setOnClickListener(this);
                 ((TextView)findViewById(R.id.tvMoreInfo)).setText(R.string.RESULT_MORE_INFO);
 
-            } else {
+            } else {*/
                 findViewById(R.id.ivProgress).setVisibility(View.GONE);
                 ((TextView)findViewById(R.id.tvMoreInfo)).setText(R.string.RESULT_NO_MORE_INFO);
-            }
+            //}
         }
 
         // ready to swipe
@@ -201,6 +208,9 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
                 break;
             case R.id.ivProgress:
                 mCallback.onClickBtn(null, -1, BTN_ID_SEARCH_MORE);
+                break;
+            case R.id.btnShare:
+                mCallback.onClickBtn(mInfo, mPosition, BTN_ID_SHARE);
                 break;
         }
     }

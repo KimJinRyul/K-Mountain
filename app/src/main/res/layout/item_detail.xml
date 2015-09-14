@@ -490,9 +490,36 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/rlShare"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:background="#212121">
+
+        <ImageView
+            android:id="@+id/ivIconShare"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:src="@drawable/ic_share_white"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/ivIconShare"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="30dp"
+            android:textColor="#fff"
+            android:textSize="20dp"
+            android:text="@string/DETAIL_SHARE"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
         android:id="@+id/rlLast"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
         android:visibility="visible">
         <TextView
             android:layout_width="wrap_content"

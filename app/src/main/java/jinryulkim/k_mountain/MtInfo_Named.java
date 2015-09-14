@@ -1,6 +1,5 @@
 package jinryulkim.k_mountain;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**

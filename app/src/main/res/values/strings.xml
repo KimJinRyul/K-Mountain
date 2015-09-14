@@ -4,8 +4,10 @@
 
     <string name="MAIN_DESCRIPTION_SEARCH">찾으시는 산 이름을 입력하고 검색하세요.</string>
     <string name="MAIN_NOW_LOADING">검색 중입니다</string>
+    <string name="MAIN_FAIL_INIT">DB를 초기화 하는데 실패하였습니다.</string>
 
     <string name="RESULT_ITEM_NAMED">100代名山</string>
+    <string name="RESULT_MAPINFO">지도정보 있음</string>
     <string name="RESULT_HEIGHT">(%sM)</string>
     <string name="RESULT_MORE_INFO">더 많은 정보 검색 하기</string>
     <string name="RESULT_NO_MORE_INFO">끝 입니다.</string>
@@ -21,7 +23,8 @@
     <string name="DETAIL_SUMMARY">개요</string>
     <string name="DETAIL_DETAIL">상세내용</string>
     <string name="DETAIL_ADMIN">연락처</string>
-    <string name="DETAIL_MAP">지도정보 보기</string>
+    <string name="DETAIL_MAP">지도정보</string>
+    <string name="DETAIL_SHARE">공유</string>
     <string name="DETAIL_LAST">마지막 입니다.</string>
 
     <string name="NAMED_REASON">100대명산 선정이유</string>
@@ -36,6 +39,10 @@
     <string name="DLG_GPSOFF_BTNNEGATIVE">사용안함</string>
     <string name="DLG_GPSOFF_BTNPOSITIVE">설정하기</string>
 
-    <string name="MAP_MY_POINT">내 현재위치</string>
+    <string name="MAP_MY_POINT">내위치</string>
+    <string name="MAP_POINT">등산포인트</string>
+    <string name="MAP_ROAD">등산로</string>
+
+    <string name="INTENT_SHARE">명산 정보 공유</string>
 
 </resources>

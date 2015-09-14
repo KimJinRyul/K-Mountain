@@ -45,8 +45,7 @@
             android:shadowColor="#000"
             android:shadowRadius="5"
             android:textColor="#fff"
-            android:textSize="26dp"
-            android:text="가지"/>
+            android:textSize="26dp" />
 
         <TextView
             android:id="@+id/tvHeight"
@@ -58,22 +57,38 @@
             android:shadowColor="#000"
             android:shadowRadius="5"
             android:textColor="#bbdefb"
-            android:textSize="14dp"
-            android:text="@string/RESULT_HEIGHT"/>
+            android:textSize="14dp" />
 
-        <TextView
-            android:id="@+id/tvNamed"
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="12dp"
+            android:layout_marginRight="20dp"
             android:layout_marginTop="8dp"
-            android:shadowColor="#fff"
-            android:shadowRadius="5"
-            android:textColor="#ff5722"
-            android:textSize="16dp"
-            android:textStyle="bold"
-            android:text="@string/RESULT_ITEM_NAMED" />
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tvNamed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:shadowColor="#fff"
+                android:shadowRadius="5"
+                android:textColor="#ff5722"
+                android:textSize="16dp"
+                android:textStyle="bold"
+                android:text="@string/RESULT_ITEM_NAMED" />
+
+            <TextView
+                android:id="@+id/tvMap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:shadowColor="#fff"
+                android:shadowRadius="5"
+                android:textColor="#ff5722"
+                android:textSize="16dp"
+                android:textStyle="bold"
+                android:text="@string/RESULT_MAPINFO"/>
+        </LinearLayout>
 
     </RelativeLayout>
 
@@ -115,6 +130,17 @@
             android:textColor="#ff8f00"
             android:textSize="16dp"
             android:text="@string/CARD_DETAIL"/>
+
+        <Button
+            android:id="@+id/btnShare"
+            android:layout_toRightOf="@id/btnDetail"
+            android:layout_marginLeft="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:textColor="#ff8f00"
+            android:textSize="16dp"
+            android:text="@string/CARD_SHARE"/>
 
     </RelativeLayout>
 

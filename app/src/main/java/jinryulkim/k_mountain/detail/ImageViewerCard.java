@@ -43,6 +43,7 @@ public class ImageViewerCard extends View {
 
     private MtInfo_General mInfo;
     private int mInfoPosition;
+    private boolean mMapExist = false;
 
     private final static int BTN_STATE_NOTHING = 0;
     private final static int BTN_STATE_BACK = 1;
@@ -139,6 +140,9 @@ public class ImageViewerCard extends View {
         mCurImage = 0;
         if(mImages.size() > 1)
             mHandler.sendEmptyMessageDelayed(MESSAGE_CHANGE_IMAGE, IMAGE_CHANGE_TIME);
+
+        if(CommonUtils.isExistInAsset(mContext, mInfo.code))
+            mMapExist = true;
     }
 
     private int getNextImg() {
@@ -230,6 +234,10 @@ public class ImageViewerCard extends View {
         }
     }
 
+    public int getMinimuxHeight() {
+        return mOriginHeight - mFlexableHeight;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
 
@@ -271,7 +279,9 @@ public class ImageViewerCard extends View {
 
         // draw btns
         mDrawableBack.draw(canvas);
-        mDrawableMap.draw(canvas);
+
+        if(mMapExist)
+            mDrawableMap.draw(canvas);
     }
 
     private void checkkBtnArea(Point pt) {
@@ -303,7 +313,8 @@ public class ImageViewerCard extends View {
                         mListener.onClickBack();
                         break;
                     case BTN_STATE_MAP:
-                        mListener.onClickMap();
+                        if(mMapExist)
+                            mListener.onClickMap();
                         break;
                 }
                 mBtnState = BTN_STATE_NOTHING;

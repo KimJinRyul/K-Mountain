@@ -7,7 +7,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ import jinryulkim.k_mountain.MtInfoMgr;
 import jinryulkim.k_mountain.MtInfo_General;
 import jinryulkim.k_mountain.MtOpenAPIMgr;
 import jinryulkim.k_mountain.R;
-import jinryulkim.k_mountain.map.MapActivity;
 
 /**
  * Created by jinryulkim on 15. 8. 27..
@@ -97,14 +95,14 @@ public class ResultActivity extends Activity implements ListAdapter.CardListener
         mPinnedHeaderListView.setListener(this);
     }
 
-    private void searchMore() {
+    /*private void searchMore() {
         if(mBNowSearching == false && MtInfoMgr.totalCnt > MtInfoMgr.mMtInfos.size() + MtInfoMgr.deletedCnt) {
             mBNowSearching = true;
             mListAdapter.startLoading();
             MtOpenAPIMgr.setListener(this);
             MtOpenAPIMgr.requestGeneralInfo(this, MtInfoMgr.pageUnit, MtInfoMgr.pageIndex + 1, MtInfoMgr.searchWrd, false);
         }
-    }
+    }*/
 
     @Override
     public void onCardRemoved(MtInfo_General info, int position) {
@@ -120,12 +118,15 @@ public class ResultActivity extends Activity implements ListAdapter.CardListener
         Intent intent = null;
         switch(btnID) {
             case CardView.BTN_ID_SEARCH_MORE:
-                searchMore();
+                //searchMore();
                 break;
             case CardView.BTN_ID_DETAIL:
                 intent = new Intent(this, DetailActivity.class);
                 intent.putExtra(DetailActivity.EXTRA_POSITION, position);
                 startActivity(intent);
+                break;
+            case CardView.BTN_ID_SHARE:
+                CommonUtils.launchShare(this, info);
                 break;
         }
     }
@@ -137,7 +138,7 @@ public class ResultActivity extends Activity implements ListAdapter.CardListener
 
     @Override
     public void onScrollLimit() {
-        searchMore();
+        //searchMore();
     }
 
     @Override

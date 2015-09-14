@@ -1,6 +1,7 @@
 package jinryulkim.k_mountain;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -267,5 +268,47 @@ public class CommonUtils {
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
         return BitmapFactory.decodeResource(res, resId, options);
+    }
+
+    public static void launchShare(Context context, MtInfo_General info) {
+
+        /*String imgPath;
+        File imgFile;
+        if(info.imagePaths.size() > 0 &&
+           (imgPath = info.makeImagePath(context, 0)) != null &&
+           (imgFile = new File(imgPath)).exists()) {        // 이미지 파일이 존재 할 때
+            // step 1, 대표 이미지 파일을 temp 폴더에 저장
+            String fileName = imgPath.substring(imgPath.lastIndexOf("/"));
+            File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            /*String fileName = new File(downloadDir, info.imagePaths.get(0))
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("image/*");
+            intent.putExtra(Intent.EXTRA_STREAM, Uri.parse(imageFilePath));
+
+            context.startActivity(Intent.createChooser(intent, context.getString(R.string.INTENT_SHARE)));*/
+        //} else {                               // 이미지 없음
+            String text = "";
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+
+            sendIntent.putExtra(Intent.EXTRA_TITLE, info.name + "(" + info.high + ")");
+            text = info.name + "(" + info.high + "M)";
+            if(info.sname != null)
+                text += "\n" + info.sname;
+            if(info.address != null)
+                text += "\n" + info.address;
+
+            text += "\n\n";
+
+            if( info.summary != null && info.summary.length() > 0) {
+                text += info.summary;
+            } else if(info.detail != null && info.detail.length() > 0) {
+                text += info.detail;
+            }
+
+            sendIntent.putExtra(Intent.EXTRA_TEXT, text);
+            sendIntent.setType("text/plain");
+            context.startActivity(Intent.createChooser(sendIntent, context.getString(R.string.INTENT_SHARE)));
+     //   }
     }
 }

@@ -12,7 +12,6 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
@@ -429,7 +428,7 @@ public class MapActivity extends Activity {
                         int tag = MAP_POINT_WAY + i;
                         marker.setItemName(name);
                         marker.setTag(tag);
-                        Log.i("jrkim", "add tag : "+ tag);
+
                         marker.setMapPoint(mapPoint);
                         marker.setMarkerType(MapPOIItem.MarkerType.YellowPin);
                         marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);

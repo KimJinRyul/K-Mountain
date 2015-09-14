@@ -4,6 +4,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
@@ -460,6 +461,17 @@ public class InfoCard extends LinearLayout implements View.OnClickListener {
             }
         }
 
+        //Display dp = mContext.getWindowManager().getDefaultDisplay();
+        Rect rtDp = new Rect();
+        getWindowVisibleDisplayFrame(rtDp);
+
+        RelativeLayout rlLast = (RelativeLayout)findViewById(R.id.rlLast);
+        ViewGroup.LayoutParams lp = rlLast.getLayoutParams();
+        lp.height = rtDp.height() - CommonUtils.DP2PX(mContext, 160);
+        rlLast.setLayoutParams(lp);
+
+        findViewById(R.id.rlShare).setOnClickListener(this);
+
         initShpFile();
         mHandler.sendEmptyMessage(MESSAGE_READY_TO_EXPAND);
     }
@@ -682,6 +694,9 @@ public class InfoCard extends LinearLayout implements View.OnClickListener {
                         ((ImageView)findViewById(R.id.ivIconEtcCourceEx)).setImageResource(R.drawable.ic_expand_less_white);
                     }
                 }
+                break;
+            case R.id.rlShare:
+                CommonUtils.launchShare(mContext, mInfo);
                 break;
         }
     }

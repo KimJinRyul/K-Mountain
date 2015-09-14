@@ -9,8 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <RelativeLayout
-        android:id="@+id/rlBtns"
+    <LinearLayout
+        android:id="@+id/llBtns"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -20,34 +20,82 @@
         android:paddingRight="10dp"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
-        android:background="@drawable/shape_map_btn" >
+        android:background="@drawable/shape_map_btn"
+        android:orientation="horizontal">
 
-        <ToggleButton
-            android:id="@+id/tbPoints"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/ic_pin_drop_white"
-            android:textOn=""
-            android:textOff=""/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
 
-        <ToggleButton
-            android:id="@+id/tbWays"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_toRightOf="@id/tbPoints"
-            android:layout_marginLeft="10dp"
-            android:background="@drawable/ic_directions_run_white"
-            android:textOn = ""
-            android:textOff=""/>
+            <ToggleButton
+                android:id="@+id/tbPoints"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@xml/btn_tb_droppin"
+                android:textOn=""
+                android:textOff=""/>
 
-        <ImageView
-            android:id="@+id/ivGPS"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_toRightOf="@id/tbWays"
-            android:layout_marginLeft="10dp"
-            android:src="@drawable/ic_gps_off_white" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:textColor="#fff"
+                android:textSize="10dp"
+                android:text="@string/MAP_POINT"/>
 
-    </RelativeLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginLeft="10dp">
+
+            <ToggleButton
+                android:id="@+id/tbWays"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@xml/btn_tb_ways"
+                android:textOn = ""
+                android:textOff=""/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:textColor="#fff"
+                android:textSize="10dp"
+                android:text="@string/MAP_ROAD"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginLeft="10dp">
+
+            <ImageView
+                android:id="@+id/ivGPS"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_toRightOf="@id/tbWays"
+                android:src="@drawable/ic_gps_off_white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:textColor="#fff"
+                android:textSize="10dp"
+                android:text="@string/MAP_MY_POINT"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </RelativeLayout>

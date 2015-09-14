@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import java.sql.SQLException;
 
@@ -28,12 +27,14 @@ public class NamedDBManager {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(NamedDBConst._CREATE);
+            db.execSQL(NamedDBConst._CREATE_GEN);
+            db.execSQL(NamedDBConst._CREATE_NAMED);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            db.execSQL("DROP TABLE IF EXIST " + NamedDBConst._TABLE);
+            db.execSQL("DROP TABLE IF EXIST " + NamedDBConst._GEN_TABLE);
+            db.execSQL("DROP TABLE IF EXIST " + NamedDBConst._NAMED_TABLE);
             onCreate(db);
         }
     }
@@ -55,10 +56,11 @@ public class NamedDBManager {
         }
     }
 
-    public void openReadonly() throws SQLException {
+    public void openReadonly(String dbPath) throws SQLException {
         if(mDB == null) {
-            mHelper = new DBHelper(mContext, NamedDBConst.DB_NAME, null, DB_VERSION);
-            mDB = mHelper.getReadableDatabase();
+            //mHelper = new DBHelper(mContext, NamedDBConst.DB_NAME, null, DB_VERSION);
+            //mDB = mHelper.getReadableDatabase();
+            mDB = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
         }
     }
 
@@ -69,29 +71,61 @@ public class NamedDBManager {
         }
     }
 
-    public Cursor get(String type, String [] item) {
-        return mDB.rawQuery("SELECT * FROM " + NamedDBConst._TABLE + " WHERE " + type + " = ?", item);
+    public Cursor getLike(String table, String type, String [] item) {
+        return mDB.rawQuery("SELECT * FROM " + table + " WHERE " + type + " LIKE ?", item);
     }
 
-    public Cursor getAll() {
-        return mDB.query(NamedDBConst._TABLE, null, null, null, null, null, null);
+    public Cursor get(String table, String type, String [] item) {
+        return mDB.rawQuery("SELECT * FROM " + table+ " WHERE " + type + " = ?", item);
     }
 
-    public boolean isExistInDB(String type, String [] item) {
+    public Cursor getAll(String table) {
+        return mDB.query(table, null, null, null, null, null, null);
+    }
+
+    public boolean isExistInDB(String table, String type, String [] item) {
         boolean bRet = false;
-        Cursor cursor = get(type, item);
+        Cursor cursor = get(table, type, item);
         if(cursor.getCount() > 0)
             bRet = true;
         cursor.close();
         return bRet;
     }
 
-    public boolean insertDB(String mntNm, String subNm, String mntnCd, String areaNm, String mntHeight,
+    public boolean insertGenDB(String code, String name, String sname,
+                               String address, String high, String admin, String adminNum,
+                               String imagePaths, String summary, String detail) {
+
+        if(isExistInDB(NamedDBConst._GEN_TABLE, NamedDBConst.code, new String [] {code})) {
+            return false;
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(NamedDBConst.code, code != null ? code : "");
+        values.put(NamedDBConst.name, name != null ? name : "");
+        values.put(NamedDBConst.sname, sname != null ? sname : "");
+        values.put(NamedDBConst.address, address != null ? address : "");
+        values.put(NamedDBConst.high, high != null ? high : "");
+        values.put(NamedDBConst.admin, admin != null ? admin : "");
+        values.put(NamedDBConst.adminNum, adminNum != null ? adminNum : "");
+        values.put(NamedDBConst.imagePaths, imagePaths != null ? imagePaths : "");
+        values.put(NamedDBConst.summary, summary != null ? summary : "");
+        values.put(NamedDBConst.detail, detail != null ? detail : "");
+
+        mDB.insert(NamedDBConst._GEN_TABLE, null, values);
+
+
+        Cursor cursor = getAll(NamedDBConst._GEN_TABLE);
+        cursor.close();
+
+        return true;
+    }
+
+    public boolean insertNamedDB(String mntNm, String subNm, String mntnCd, String areaNm, String mntHeight,
                             String areaReason, String overView, String details, String tpTitl, String tpContent,
                             String transport, String tourismInf, String etcCourse, String flashUrl, String videoUrl) {
 
-        if(isExistInDB(NamedDBConst.mntnCd, new String [] {mntnCd})) {
-            Log.e("jrkim", mntNm + "-" + mntnCd + " is aready exist in DB");
+        if(isExistInDB(NamedDBConst._NAMED_TABLE, NamedDBConst.mntnCd, new String [] {mntnCd})) {
             return false;
         }
 
@@ -112,11 +146,10 @@ public class NamedDBManager {
         values.put(NamedDBConst.flashUrl, flashUrl);
         values.put(NamedDBConst.videoUrl, videoUrl);
 
-        mDB.insert(NamedDBConst._TABLE, null, values);
+        mDB.insert(NamedDBConst._NAMED_TABLE, null, values);
 
 
-        Cursor cursor = getAll();
-        Log.i("jrkim", "inserted : " + cursor.getCount());
+        Cursor cursor = getAll(NamedDBConst._NAMED_TABLE);
         cursor.close();
 
         return true;
