@@ -11,6 +11,7 @@
     <string name="RESULT_HEIGHT">(%sM)</string>
     <string name="RESULT_MORE_INFO">더 많은 정보 검색 하기</string>
     <string name="RESULT_NO_MORE_INFO">끝 입니다.</string>
+    <string name="RESULT_WEATHER_LOADING">날씨 정보 검색 중...</string>
 
     <string name="CARD_DETAIL">자세히 보기</string>
     <string name="CARD_SHARE">공유하기</string>

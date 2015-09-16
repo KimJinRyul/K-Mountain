@@ -5,11 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Typeface;
 
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -27,6 +29,7 @@ import java.lang.ref.WeakReference;
 
 import jinryulkim.k_mountain.DB.NamedDBConst;
 
+import jinryulkim.k_mountain.DB.NamedDBManager;
 import jinryulkim.k_mountain.result.ResultActivity;
 
 public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrListener,
@@ -76,7 +79,7 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
 
     private void showSearchResult(boolean success) {
         if(success) {
-            if (MtInfoMgr.mMtInfos.size() <= 0) {
+            if (MtInfoMgr.mMtInfos.size() <= 2) {
                 hideProgress();
                 Toast.makeText(this, R.string.TOAST_NO_RESULT, Toast.LENGTH_SHORT).show();
             } else {
@@ -168,32 +171,57 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
             Toast.makeText(this, getString(R.string.MAIN_FAIL_INIT), Toast.LENGTH_SHORT).show();
         }
 
+        // DB test code
        /* try {
             NamedDBManager db = NamedDBManager.getInstance(this);
             db.openReadonly(CommonUtils.getDBPath(this));
             Cursor cursor = db.getAll(NamedDBConst._GEN_TABLE);
 
             Log.i("jrkim", "cursorSize:" + cursor.getCount());
-
+           String code, name, address;
             while(cursor.moveToNext()) {
-                Log.i("jrkim", "-----------------");
-                Log.i("jrkim", "code:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.code)).trim());
-                Log.i("jrkim", "name:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.name)).trim());
-                Log.i("jrkim", "sname:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.sname)).trim());
-                Log.i("jrkim", "high:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.high)).trim());
-                Log.i("jrkim", "address:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.address)).trim());
-                Log.i("jrkim", "admin:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.admin)).trim());
-                Log.i("jrkim", "adminNum:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.adminNum)).trim());
-                Log.i("jrkim", "summary:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.summary)).trim());
-                Log.i("jrkim", "detail:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.detail)).trim());
-                Log.i("jrkim", "imagePaths:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.imagePaths)).trim());
+                //Log.i("jrkim", "-----------------");
+                //code = cursor.getString(cursor.getColumnIndex(NamedDBConst.code)).trim();
+                //name = cursor.getString(cursor.getColumnIndex(NamedDBConst.name)).trim();
+                //Log.i("jrkim", "sname:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.sname)).trim());
+                //Log.i("jrkim", "high:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.high)).trim());
+                address = cursor.getString(cursor.getColumnIndex(NamedDBConst.address)).trim();
+                //Log.i("jrkim", "admin:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.admin)).trim());
+                //Log.i("jrkim", "adminNum:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.adminNum)).trim());
+                //Log.i("jrkim", "summary:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.summary)).trim());
+                //Log.i("jrkim", "detail:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.detail)).trim());
+                //Log.i("jrkim", "imagePaths:" + cursor.getString(cursor.getColumnIndex(NamedDBConst.imagePaths)).trim());
+
+                //Log.i("jrkim", name + "-" + code + "-" + address);
+                String cityLine;
+                String [] citySplit;
+                boolean bMatched = false;
+                for(int i = 0; i < CommonUtils.cityToGeo.length; i++) {
+                    cityLine = CommonUtils.cityToGeo[i];
+                    citySplit = cityLine.split("_");
+                    if(citySplit.length == 3) {
+                        if(address.indexOf(citySplit[0]) >= 0) {
+                            Log.i("jrkim", address + " is matched to " + cityLine);
+                            bMatched = true;
+                            break;
+                        }
+
+                    } else {
+                        Log.e("jrkim", cityLine + " doesn't split by 3");
+                    }
+                }
+
+                if(bMatched == false) {
+                    Log.e("jrkim", address + " is not matched....!!!!");
+                }
             }
             cursor.close();
 
         } catch (Exception e) {
             Log.e("jrkim", "db...." + e.getMessage());
         }
-        Log.i("jrkim", "DONE");*/
+        Log.i("jrkim", "DONE");
+        */
     }
 
     private boolean copyDBFromAssetIfNotExist() {

@@ -14,6 +14,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.util.Calendar;
+
 import jinryulkim.k_mountain.CardTouchListener;
 import jinryulkim.k_mountain.CommonUtils;
 import jinryulkim.k_mountain.MtInfo_General;
@@ -31,6 +33,7 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
     private final static int ANIMATION_TIME = 600;
     private final static int MESSAGE_START_ANIMATION = 1000;
     private final static int MESSAGE_IMAGE_DOWNLOADED = 1001;
+    private final static int MESSAGE_WEATHER_DOWNLOADED = 1002;
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -43,6 +46,9 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
                     break;
                 case MESSAGE_IMAGE_DOWNLOADED:
                     setDownloadedImage();
+                    break;
+                case MESSAGE_WEATHER_DOWNLOADED:
+                    setWeatherInfo(true);
                     break;
             }
         }
@@ -82,6 +88,92 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
 
     public void downloadCompleted() {
         mHandler.sendEmptyMessage(MESSAGE_IMAGE_DOWNLOADED);
+    }
+
+    public void weatherCompleted() {
+        mHandler.sendEmptyMessageDelayed(MESSAGE_WEATHER_DOWNLOADED, 500);
+    }
+
+    private void setWeatherInfo(boolean animation) {
+
+        Calendar cal = Calendar.getInstance();
+        int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);   // 오늘 날짜
+        int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);      // 일요일 = 1
+        int lastDay = cal.getActualMaximum(Calendar.DATE);  // 이번달 마지막 날
+
+
+        findViewById(R.id.ivWeatherProgress).clearAnimation();
+        findViewById(R.id.ivWeatherProgress).setVisibility(View.GONE);
+        findViewById(R.id.tvWeatherLoading).setVisibility(View.GONE);
+
+        findViewById(R.id.rlTodaysWeather).setBackgroundResource(CommonUtils.getWeatherIconResId(mInfo.todaysWeather.id));
+        ((TextView)findViewById(R.id.tvCurrentTemp)).setText(mInfo.todaysWeather.tempDay + "°C");
+
+        ((ImageView)findViewById(R.id.ivDay1)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(0).id));
+        ((ImageView)findViewById(R.id.ivDay2)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(1).id));
+        ((ImageView)findViewById(R.id.ivDay3)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(2).id));
+        ((ImageView)findViewById(R.id.ivDay4)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(3).id));
+        ((ImageView)findViewById(R.id.ivDay5)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(4).id));
+
+        // 1
+        dayOfWeek = ((dayOfWeek + 1) % 8);
+        if(dayOfWeek == 0) dayOfWeek = 1;
+        dayOfMonth += 1;
+        if(dayOfMonth > lastDay) dayOfMonth = 1;
+        setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay1)));
+        ((TextView)findViewById(R.id.tvDay1TempMax)).setText(mInfo.arrWeathers.get(0).tempMax);
+        ((TextView)findViewById(R.id.tvDay1TempMin)).setText(mInfo.arrWeathers.get(0).tempMin);
+
+        // 2
+        dayOfWeek = ((dayOfWeek + 1) % 8);
+        if(dayOfWeek == 0) dayOfWeek = 1;
+        dayOfMonth += 1;
+        if(dayOfMonth > lastDay) dayOfMonth = 1;
+        setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay2)));
+        ((TextView)findViewById(R.id.tvDay2TempMax)).setText(mInfo.arrWeathers.get(1).tempMax);
+        ((TextView)findViewById(R.id.tvDay2TempMin)).setText(mInfo.arrWeathers.get(1).tempMin);
+
+        // 3
+        dayOfWeek = ((dayOfWeek + 1) % 8);
+        if(dayOfWeek == 0) dayOfWeek = 1;
+        dayOfMonth += 1;
+        if(dayOfMonth > lastDay) dayOfMonth = 1;
+        setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay3)));
+        ((TextView)findViewById(R.id.tvDay3TempMax)).setText(mInfo.arrWeathers.get(2).tempMax);
+        ((TextView)findViewById(R.id.tvDay3TempMin)).setText(mInfo.arrWeathers.get(2).tempMin);
+
+        // 4
+        dayOfWeek = ((dayOfWeek + 1) % 8);
+        if(dayOfWeek == 0) dayOfWeek = 1;
+        dayOfMonth += 1;
+        if(dayOfMonth > lastDay) dayOfMonth = 1;
+        setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay4)));
+        ((TextView)findViewById(R.id.tvDay4TempMax)).setText(mInfo.arrWeathers.get(3).tempMax);
+        ((TextView)findViewById(R.id.tvDay4TempMin)).setText(mInfo.arrWeathers.get(3).tempMin);
+
+        // 5
+        dayOfWeek = ((dayOfWeek + 1) % 8);
+        if(dayOfWeek == 0) dayOfWeek = 1;
+        dayOfMonth += 1;
+        if(dayOfMonth > lastDay) dayOfMonth = 1;
+        setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay5)));
+        ((TextView)findViewById(R.id.tvDay5TempMax)).setText(mInfo.arrWeathers.get(4).tempMax);
+        ((TextView)findViewById(R.id.tvDay5TempMin)).setText(mInfo.arrWeathers.get(4).tempMin);
+
+        if(animation) {
+            findViewById(R.id.rlTodaysWeather).startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.zoom_enter));
+            findViewById(R.id.llWeathers).startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in));
+        }
+
+        findViewById(R.id.llWeathers).setVisibility(VISIBLE);
+        findViewById(R.id.rlTodaysWeather).setVisibility(View.VISIBLE);
+    }
+
+    private void setDateText(int dayOfWeek, int dayOfMonth, TextView tv) {
+        tv.setText(dayOfMonth + CommonUtils.getDayOfWeek(dayOfWeek));
+        if(dayOfWeek == 7)  tv.setTextColor(0xff0000ff);
+        else if(dayOfWeek == 1) tv.setTextColor(0xffff0000);
+        else tv.setTextColor(0xff000000);
     }
 
     private void setDownloadedImage() {
@@ -170,6 +262,15 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
                 }
             } else {
                 ((ImageView)findViewById(R.id.ivProgress)).setImageResource(R.drawable.ic_highlight_remove_white);
+            }
+
+            if(mInfo.weatherinfo == true) {
+                setWeatherInfo(false);
+            } else {
+                findViewById(R.id.rlTodaysWeather).setVisibility(GONE);
+                findViewById(R.id.ivWeatherProgress).startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate));
+                findViewById(R.id.ivWeatherProgress).setVisibility(VISIBLE);
+                mInfo.requestWeatherInfo(mContext);
             }
 
             findViewById(R.id.btnDetail).setOnClickListener(this);
