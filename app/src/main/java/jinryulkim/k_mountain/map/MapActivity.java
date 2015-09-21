@@ -367,7 +367,6 @@ public class MapActivity extends Activity {
                             mbGPSProvider = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
                             mbNETProvider = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-                            boolean located = false;
                             if (mbNETProvider) {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                     if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -378,11 +377,10 @@ public class MapActivity extends Activity {
                                 Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                                 if (location != null) {
                                     makeMyPoint(location);
-                                    located = true;
                                 }
                             }
 
-                            if (mbGPSProvider && located == false) {
+                            if (mbGPSProvider) {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                     if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                                             checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

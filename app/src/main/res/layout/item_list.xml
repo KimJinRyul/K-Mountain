@@ -13,12 +13,12 @@
         android:layout_height="190dp"
         android:background="#90a4ae">
 
-
         <ImageView
             android:id="@+id/ivImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop" />
+
         <ImageView
             android:id="@+id/ivProgress"
             android:layout_width="35dp"
@@ -66,7 +66,7 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:background="@drawable/w01d"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <TextView
                 android:id="@+id/tvCurrentTemp"
@@ -74,13 +74,37 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginBottom="5dp"
+                android:layout_marginBottom="3dp"
                 android:shadowColor="#fff"
                 android:shadowRadius="5"
-                android:textSize="20dp"
+                android:textSize="14dp"
                 android:textColor="#ff9800" />
-
         </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tvSunRise"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/rlTodaysWeather"
+            android:layout_marginLeft="10dp"
+            android:textColor="#e040fb"
+            android:textSize="8dp"
+            android:shadowColor="#fff"
+            android:shadowRadius="5"
+            android:text="@string/RESULT_SUNRISE"
+            android:visibility="gone"/>
+        <TextView
+            android:id="@+id/tvSunSet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvSunRise"
+            android:layout_alignLeft="@id/tvSunRise"
+            android:textColor="#6200ea"
+            android:textSize="8dp"
+            android:shadowColor="#fff"
+            android:shadowRadius="5"
+            android:text="@string/RESULT_SUNSET"
+            android:visibility="gone"/>
 
 
         <LinearLayout
@@ -439,6 +463,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:paddingLeft="24dp"
+        android:paddingRight="24dp"
         android:layout_below="@id/llInfos">
 
         <Button
@@ -453,13 +478,23 @@
         <Button
             android:id="@+id/btnShare"
             android:layout_toRightOf="@id/btnDetail"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="15dp"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:background="@null"
             android:textColor="#ff8f00"
             android:textSize="16dp"
             android:text="@string/CARD_SHARE"/>
+
+        <Button
+            android:id="@+id/btnMy"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:background="@null"
+            android:textColor="#673ab7"
+            android:textSize="16dp"
+            android:text="@string/CARD_ADDMY"/>
 
     </RelativeLayout>
 

@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    <uses-permission android:name="android.permission.SEND_SMS" />
+
     <!--
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -26,26 +28,34 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".SearchActivity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".named100.Named100Activity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".My.MyActivity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".help.HelpActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
         <activity android:name=".result.ResultActivity"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait" />
 
         <activity android:name=".detail.DetailActivity"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait" />
 
         <activity android:name=".map.MapActivity"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait" />
 
         <activity android:name=".InfoActivity"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait" />
 
         <activity android:name=".DialogActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
-        </activity>
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
     </application>
 

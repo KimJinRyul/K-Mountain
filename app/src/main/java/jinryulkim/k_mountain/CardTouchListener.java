@@ -9,7 +9,11 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
+import javax.xml.transform.Result;
+
+import jinryulkim.k_mountain.My.MyActivity;
 import jinryulkim.k_mountain.result.CardView;
+import jinryulkim.k_mountain.result.ListAdapter;
 import jinryulkim.k_mountain.result.ResultActivity;
 
 /**
@@ -26,17 +30,19 @@ public class CardTouchListener implements View.OnTouchListener {
     private float mTranslationX;
     private int mViewWidth = 1;
     private boolean mSwipe = false;
+    private int mListType = ListAdapter.LIST_TYPE_RESULT;
 
     public interface CardTouchCallback {
         void onDismiss(MtInfo_General info, int position);
-        void onClickBtn(MtInfo_General info, int position, int btnId);
+        void onClickBtn(MtInfo_General info, int position, int btnId, Object obj);
     }
 
     CardTouchCallback mCallback = null;
 
-    public CardTouchListener(CardView cardView, CardTouchCallback callback) {
+    public CardTouchListener(CardView cardView, CardTouchCallback callback, int listType) {
         mCardView = cardView;
         mCallback = callback;
+        mListType = listType;
 
         ViewConfiguration vc = ViewConfiguration.get(mCardView.getContext());
         mSlop = vc.getScaledTouchSlop();
@@ -102,25 +108,10 @@ public class CardTouchListener implements View.OnTouchListener {
                     dismissRight = vX > 0;
                 }
 
-                if(dismiss == true && ResultActivity.mCardDismissingNow == false) {
-                    ResultActivity.mCardDismissingNow = true;
-                    mCardView.animate()
-                            .translationX(dismissRight ? mViewWidth : -mViewWidth)
-                            .alpha(0)
-                            .setDuration(mAnimationTime)
-                            .setListener(new AnimatorListenerAdapter() {
-                                @Override
-                                public void onAnimationEnd(Animator animator) {
-                                    performDismiss();
-                                }
-                            });
-                } else {
-                    mCardView.animate()
-                            .translationX(0)
-                            .alpha(1)
-                            .setDuration(mAnimationTime)
-                            .setListener(null);
-                }
+                if(dismiss)
+                    doDismiss(dismissRight);
+
+
                 mVT.recycle();
                 mVT = null;
                 mStartX = 0;
@@ -128,6 +119,48 @@ public class CardTouchListener implements View.OnTouchListener {
                 break;
         }
         return false;
+    }
+
+    public void doDismiss(boolean dismissRight) {
+        boolean cardDismiss = false;
+        switch(mListType) {
+            case ListAdapter.LIST_TYPE_RESULT:
+                cardDismiss = ResultActivity.mCardDismissingNow;
+                break;
+            case ListAdapter.LIST_MY:
+                cardDismiss = MyActivity.mCardDismissingNow;
+        }
+        if(cardDismiss == false) {
+            switch(mListType) {
+                case ListAdapter.LIST_TYPE_RESULT:
+                    ResultActivity.mCardDismissingNow = true;
+                    break;
+                case ListAdapter.LIST_MY:
+                    MyActivity.mCardDismissingNow = true;
+                    break;
+            }
+
+            if(mViewWidth < 2) {
+                mViewWidth = mCardView.getWidth();
+            }
+
+            mCardView.animate()
+                    .translationX(dismissRight ? mViewWidth : -mViewWidth)
+                    .alpha(0)
+                    .setDuration(mAnimationTime)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animator) {
+                            performDismiss();
+                        }
+                    });
+        } else {
+            mCardView.animate()
+                    .translationX(0)
+                    .alpha(1)
+                    .setDuration(mAnimationTime)
+                    .setListener(null);
+        }
     }
 
     private void performDismiss() {

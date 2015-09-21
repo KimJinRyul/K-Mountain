@@ -125,8 +125,9 @@ public class CommonUtils {
             InputStream is = context.getAssets().open("geo/" + code + ".zip");
             if(is != null)
                 bRes = true;
+        } catch (FileNotFoundException e) {
+            bRes = false;
         } catch( IOException e) {
-            e.printStackTrace();
             bRes = false;
         }
         return bRes;

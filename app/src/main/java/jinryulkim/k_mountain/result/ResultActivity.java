@@ -12,6 +12,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import jinryulkim.k_mountain.CommonUtils;
+import jinryulkim.k_mountain.DB.MyDBManager;
 import jinryulkim.k_mountain.detail.DetailActivity;
 import jinryulkim.k_mountain.MtInfoMgr;
 import jinryulkim.k_mountain.MtInfo_General;
@@ -23,7 +24,7 @@ import jinryulkim.k_mountain.R;
  */
 public class ResultActivity extends Activity implements ListAdapter.CardListener,
                                                         PinnedHeaderListView.PinnedHeaderListViewListener,
-        MtOpenAPIMgr.MtOpenAPIMgrListener
+                                                        MtOpenAPIMgr.MtOpenAPIMgrListener
 {
     private ListAdapter mListAdapter = null;
     private PinnedHeaderListView mPinnedHeaderListView = null;
@@ -78,7 +79,7 @@ public class ResultActivity extends Activity implements ListAdapter.CardListener
         mHandler = new ResultHandler(this);
 
         mMtInfos = (ArrayList<MtInfo_General>)MtInfoMgr.mMtInfos.clone();
-        mListAdapter = new ListAdapter(this, this, mMtInfos);
+        mListAdapter = new ListAdapter(this, this, mMtInfos, true, ListAdapter.LIST_TYPE_RESULT);
 
         mPinnedHeaderListView = (PinnedHeaderListView) findViewById(R.id.lvResults);
         mPinnedHeaderListView.setSmoothScrollbarEnabled(true);
@@ -114,8 +115,9 @@ public class ResultActivity extends Activity implements ListAdapter.CardListener
     }
 
     @Override
-    public void onClickCard(MtInfo_General info, int position, int btnID) {
+    public void onClickCard(MtInfo_General info, int position, int btnID, Object obj) {
         Intent intent = null;
+        MyDBManager myDB = null;
         switch(btnID) {
             case CardView.BTN_ID_SEARCH_MORE:
                 //searchMore();
@@ -127,6 +129,18 @@ public class ResultActivity extends Activity implements ListAdapter.CardListener
                 break;
             case CardView.BTN_ID_SHARE:
                 CommonUtils.launchShare(this, info);
+                break;
+            case CardView.BTN_ID_ADDMY:
+                myDB = MyDBManager.getInstance(this);
+                myDB.open();
+                myDB.insert(info.code);
+                myDB.close();
+                break;
+            case CardView.BTN_ID_DELMY:
+                myDB = MyDBManager.getInstance(this);
+                myDB.open();
+                myDB.delete(info.code);
+                myDB.close();
                 break;
         }
     }

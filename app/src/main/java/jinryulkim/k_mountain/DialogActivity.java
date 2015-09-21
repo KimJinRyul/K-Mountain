@@ -78,8 +78,7 @@ public class DialogActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void finish() {
-        overridePendingTransition(0, R.anim.zoom_exit);
         super.finish();
-
+        overridePendingTransition(0, R.anim.zoom_exit);
     }
 }

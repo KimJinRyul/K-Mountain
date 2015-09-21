@@ -2,6 +2,17 @@
     <string name="app_name">대한민국 명산</string>
     <string name="action_settings">Settings</string>
 
+    <string name="MAIN_UI_SEARCH">산 찾아보기</string>
+    <string name="MAIN_UI_MY">My 산</string>
+    <string name="MAIN_UI_100">100대 명산</string>
+    <string name="MAIN_UI_119">산불신고/구조요청</string>
+
+    <string name="MAIN_TAB_1_MY">My 산</string>
+    <string name="MAIN_TAB_2_100">100대 명산</string>
+    <string name="MAIN_TAB_3_NEAR">가까운 산</string>
+    <string name="MAIN_TAB_MY_NODATA">저장된 내 산이 없습니다.</string>
+    <string name="MAIN_TAB_NEAR_NO_PERMISSION">앱에 위치 정보 사용 권한이 없습니다. 권한을 체크해 주세요.</string>
+
     <string name="MAIN_DESCRIPTION_SEARCH">찾으시는 산 이름을 입력하고 검색하세요.</string>
     <string name="MAIN_NOW_LOADING">검색 중입니다</string>
     <string name="MAIN_FAIL_INIT">DB를 초기화 하는데 실패하였습니다.</string>
@@ -12,14 +23,21 @@
     <string name="RESULT_MORE_INFO">더 많은 정보 검색 하기</string>
     <string name="RESULT_NO_MORE_INFO">끝 입니다.</string>
     <string name="RESULT_WEATHER_LOADING">날씨 정보 검색 중...</string>
+    <string name="RESULT_SUNRISE">일출시간:</string>
+    <string name="RESULT_SUNSET">일몰시간:</string>
 
     <string name="CARD_DETAIL">자세히 보기</string>
     <string name="CARD_SHARE">공유하기</string>
     <string name="CARD_NAMED">명산 정보 보기</string>
+    <string name="CARD_ADDMY">My 산 추가</string>
+    <string name="CARD_DELMY">My 산 제외</string>
 
     <string name="TOAST_SEARCH_NOINPUT">산 이름을 입력하세요.</string>
     <string name="TOAST_NO_RESULT">검색 결과가 없습니다.</string>
     <string name="TOAST_SEARCH_ERROR">검색중 에러가 발생하였습니다.</string>
+    <string name="TOAST_NO_MY">등록한 My 산 정보가 없습니다.</string>
+    <string name="TOAST_HELP_NO_PERMISSION">위치정보 관련 권한이 꺼져있어 사용이 불가합니다.\n권한 부여 후 다시 시도해 주세요.</string>
+    <string name="TOAST_NO_GPS">현재 위치정보를 획득하지 못했습니다. 위치정보 기능을 켜주세요.</string>
 
     <string name="DETAIL_SUMMARY">개요</string>
     <string name="DETAIL_DETAIL">상세내용</string>
@@ -45,5 +63,14 @@
     <string name="MAP_ROAD">등산로</string>
 
     <string name="INTENT_SHARE">명산 정보 공유</string>
+
+    <string name="HELP_TITLE">위급 상황을\n문자메시지로 전송합니다.\n(현재 실제로 동작하지 않음)</string>
+    <string name="HELP_DESCRIPTION">본인의 연락처 및 현재 위치정보를 포함하여\n119에 자동으로 신고 합니다.\n(GPS 기능을 켜주세요.)</string>
+    <string name="HELP_WARNING">허위,장난 신고는 소중한 타인의 생명을 구조하는데 지장을 줄 뿐아니라 공무집행 방해죄로 처벌될 수도 있습니다. 위급한 상황에서만 사용하세요!!\n</string>
+    <string name="HELP_FIRE">산불 발생 신고</string>
+    <string name="HELP_SAFE">구조 요청</string>
+
+    <string name="HELP_FIRE_MESSAGE">현재위치 경위도-(%1$s, %2$s)에 산불이 발생하였습니다. 확인하여 조치 부탁드립니다.</string>
+    <string name="HELP_SAFE_MESSAGE">현재위치 경위도-(%1$s, %2$s)에 조난되어 도움이 필요합니다. 연락 부탁드립니다.</string>
 
 </resources>

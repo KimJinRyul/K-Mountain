@@ -23,11 +23,18 @@ public class ListAdapter extends BaseAdapter {
     private static MainUICard mMainUICard = null;
     private CardListener mListener = null;
     private ArrayList<MtInfo_General> mtInfos = null;
+    private boolean mSwipe = false;
+    private int mListType = LIST_TYPE_RESULT;
+
+    public final static int LIST_TYPE_RESULT    = 0;    // 검색 결과
+    public final static int LIST_100            = 1;    // 100대 명산
+    public final static int LIST_MY             = 2;    // 내산
+    public final static int LIST_NEAR           = 3;    // 근처 산
 
 
     public interface CardListener {
         void onCardRemoved(MtInfo_General info, int position);
-        void onClickCard(MtInfo_General info, int position, int btnID);
+        void onClickCard(MtInfo_General info, int position, int btnID, Object obj);
         void onClickBack();
     }
 
@@ -38,19 +45,21 @@ public class ListAdapter extends BaseAdapter {
         }
 
         @Override
-        public void onClickBtn(MtInfo_General info, int pos, int btnId) {
-            mListener.onClickCard(info, pos, btnId);
+        public void onClickBtn(MtInfo_General info, int pos, int btnId, Object obj) {
+            mListener.onClickCard(info, pos, btnId, obj);
         }
     };
 
     private final static int MAINUI = 0;
     private final static int CARD = 1;
 
-    public ListAdapter(Context context, CardListener listener, ArrayList<MtInfo_General> infos) {
+    public ListAdapter(Context context, CardListener listener, ArrayList<MtInfo_General> infos, boolean swipe, int listType) {
         mContext = context;
         mtInfos = infos;
         mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mListener = listener;
+        mSwipe = swipe;
+        mListType = listType;
     }
 
     public void startLoading() {
@@ -104,7 +113,7 @@ public class ListAdapter extends BaseAdapter {
         MtInfo_General info = (MtInfo_General)getItem(position);
         if(info != null) {
             try {
-                if(position == 0) { // MainUICard
+                if(position == 0 && mListType == LIST_TYPE_RESULT) { // MainUICard
                     if(mMainUICard == null) {
                         mMainUICard = new MainUICard(mContext, mListener);
 
@@ -133,7 +142,7 @@ public class ListAdapter extends BaseAdapter {
                             }
                         }
 
-                        ((CardView)convertView).setMtInfo(info, position);
+                        ((CardView)convertView).setMtInfo(info, position, mSwipe, mListType);
                         info.cardview = (CardView)convertView;
 
                         if(info.animated == false) {

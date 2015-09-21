@@ -1,7 +1,6 @@
 package jinryulkim.k_mountain;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 
 import android.content.SharedPreferences;
@@ -11,14 +10,9 @@ import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -27,18 +21,17 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 
+import jinryulkim.k_mountain.DB.MyDBManager;
 import jinryulkim.k_mountain.DB.NamedDBConst;
+import jinryulkim.k_mountain.My.MyActivity;
+import jinryulkim.k_mountain.help.HelpActivity;
+import jinryulkim.k_mountain.named100.Named100Activity;
 
-import jinryulkim.k_mountain.DB.NamedDBManager;
-import jinryulkim.k_mountain.result.ResultActivity;
-
-public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrListener,
-                                                               View.OnClickListener
+public class MainActivity extends Activity implements View.OnClickListener
 {
     private final static String SHAREDPREFERENCE_NAME = "k_mountain";
     private final static String SP_DBVERSION = "db_version";
 
-    private final static int REQCODE_RESULT     = 10000;
     private static MainHandler mHandler = null;
 
     static class MainHandler extends Handler {
@@ -57,8 +50,6 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
 
     private final static int MESSAGE_SPLASH =           1000;
     private final static int MESSAGE_SPLASH_DONE =      1001;
-    private final static int MESSAGE_SEARCH_DONE =      1002;
-    private final static int MESSAGE_SEARCH_ERROR =     1003;
     public void handleMessage(Message msg) {
         switch(msg.what) {
             case MESSAGE_SPLASH:
@@ -68,27 +59,6 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
             case MESSAGE_SPLASH_DONE:
                 findViewById(R.id.rlSplash).setVisibility(View.GONE);
                 break;
-            case MESSAGE_SEARCH_DONE:
-                showSearchResult(true);
-                break;
-            case MESSAGE_SEARCH_ERROR:
-                showSearchResult(false);
-                break;
-        }
-    }
-
-    private void showSearchResult(boolean success) {
-        if(success) {
-            if (MtInfoMgr.mMtInfos.size() <= 2) {
-                hideProgress();
-                Toast.makeText(this, R.string.TOAST_NO_RESULT, Toast.LENGTH_SHORT).show();
-            } else {
-                startActivityForResult(new Intent(this, ResultActivity.class), REQCODE_RESULT);
-                overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
-            }
-        } else {
-            hideProgress();
-            Toast.makeText(this, R.string.TOAST_SEARCH_ERROR, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -96,15 +66,6 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
         findViewById(R.id.rlSplash).setVisibility(View.VISIBLE);
         findViewById(R.id.rlSplash).setAlpha(1.f);
         mHandler.sendEmptyMessageDelayed(MESSAGE_SPLASH, 3200);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode) {
-            case REQCODE_RESULT:
-                break;
-        }
     }
 
     @Override
@@ -117,23 +78,77 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
 
         mHandler = new MainHandler(this);
 
-        findViewById(R.id.btnSearch).setOnClickListener(this);
-        findViewById(R.id.btnInfo).setOnClickListener(this);
-        ((EditText)findViewById(R.id.etSearch)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        findViewById(R.id.rlUISearch).setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                switch (actionId) {
-                    case EditorInfo.IME_ACTION_SEARCH:
-                        search();
-                        return true;
-                    default:
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        findViewById(R.id.rlUISearchShadow).setVisibility(View.VISIBLE);
+                        return false;
+                    case MotionEvent.ACTION_UP:
+                        findViewById(R.id.rlUISearchShadow).setVisibility(View.GONE);
                         return false;
                 }
+                return false;
             }
         });
+
+        findViewById(R.id.rlUIMy).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        findViewById(R.id.rlUIMyShadow).setVisibility(View.VISIBLE);
+                        return false;
+                    case MotionEvent.ACTION_UP:
+                        findViewById(R.id.rlUIMyShadow).setVisibility(View.GONE);
+                        return false;
+                }
+                return false;
+            }
+        });
+
+        findViewById(R.id.rlUI100).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        findViewById(R.id.rlUI100Shadow).setVisibility(View.VISIBLE);
+                        return false;
+                    case MotionEvent.ACTION_UP:
+                        findViewById(R.id.rlUI100Shadow).setVisibility(View.GONE);
+                        return false;
+                }
+                return false;
+            }
+        });
+
+        findViewById(R.id.rlUIFire).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        findViewById(R.id.rlUIFireShadow).setVisibility(View.VISIBLE);
+                        return false;
+                    case MotionEvent.ACTION_UP:
+                        findViewById(R.id.rlUIFireShadow).setVisibility(View.GONE);
+                        return false;
+                }
+                return false;
+            }
+        });
+
+        findViewById(R.id.rlUISearch).setOnClickListener(this);
+        findViewById(R.id.rlUIMy).setOnClickListener(this);
+        findViewById(R.id.rlUI100).setOnClickListener(this);
+        findViewById(R.id.rlUIFire).setOnClickListener(this);
+        findViewById(R.id.btnInfo).setOnClickListener(this);
+
         showSplash();
 
-
+        if(copyDBFromAssetIfNotExist() == false) {
+            Toast.makeText(this, getString(R.string.MAIN_FAIL_INIT), Toast.LENGTH_SHORT).show();
+        }
 
         // 100대 명산 정보가 멍청한 탓에 임시로 전부 긁어 DB 로 저장하고 자 한다.
         //MtOpenAPIMgr.createNamedMtInfoDB(this);
@@ -166,10 +181,6 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
                 e.printStackTrace();
             }
         }*/
-
-        if(copyDBFromAssetIfNotExist() == false) {
-            Toast.makeText(this, getString(R.string.MAIN_FAIL_INIT), Toast.LENGTH_SHORT).show();
-        }
 
         // DB test code
        /* try {
@@ -262,54 +273,34 @@ public class MainActivity extends Activity implements MtOpenAPIMgr.MtOpenAPIMgrL
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        hideProgress();
-    }
-
-    private void search() {
-        ((InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(findViewById(R.id.etSearch).getWindowToken(), 0);
-        String mtName = ((EditText)findViewById(R.id.etSearch)).getText().toString().trim();
-
-        if(mtName == null || mtName.length() <= 0) {
-            Toast.makeText(this, R.string.TOAST_SEARCH_NOINPUT, Toast.LENGTH_SHORT).show();
-        } else {
-            showProgress();
-
-            MtOpenAPIMgr.setListener(this);
-            MtOpenAPIMgr.requestGeneralInfo(getApplicationContext(), mtName, null);
-        }
-    }
-
-    private void showProgress() {
-        findViewById(R.id.ivProgress).startAnimation(AnimationUtils.loadAnimation(this, R.anim.rotate));
-        findViewById(R.id.rlProgress).setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgress() {
-        findViewById(R.id.ivProgress).clearAnimation();
-        findViewById(R.id.rlProgress).setVisibility(View.GONE);
-    }
-
-    @Override
-    public void onRequestGeneralMtInfoStarted() {
-    }
-
-    @Override
-    public void onRequestGeneralMtInfoCompleted() {
-        mHandler.sendEmptyMessageDelayed(MESSAGE_SEARCH_DONE, 1000);
-    }
-
-    @Override
-    public void onRequestGeneralMtInfoError() {
-        mHandler.sendEmptyMessageDelayed(MESSAGE_SEARCH_ERROR, 1000);
-    }
-
-    @Override
     public void onClick(View v) {
         switch(v.getId()) {
-            case R.id.btnSearch:
-                search();
+            case R.id.rlUISearch:
+                startActivity(new Intent(this, SearchActivity.class));
+                overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
+                break;
+            case R.id.rlUIMy:
+                MyDBManager myDB = MyDBManager.getInstance(this);
+                myDB.open();
+                Cursor cursor = myDB.getAll();
+                int myCnt = cursor.getCount();
+                cursor.close();
+                myDB.close();
+
+                if(myCnt == 0) {
+                    Toast.makeText(this, getString(R.string.TOAST_NO_MY), Toast.LENGTH_SHORT).show();
+                } else {
+                    startActivity(new Intent(this, MyActivity.class));
+                    overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
+                }
+                break;
+            case R.id.rlUI100:
+                startActivity(new Intent(this, Named100Activity.class));
+                overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
+                break;
+            case R.id.rlUIFire:
+                startActivity(new Intent(this, HelpActivity.class));
+                overridePendingTransition(R.anim.zoom_enter, 0);
                 break;
             case R.id.btnInfo:
                 startActivity(new Intent(this, InfoActivity.class));

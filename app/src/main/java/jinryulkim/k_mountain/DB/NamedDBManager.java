@@ -148,9 +148,8 @@ public class NamedDBManager {
 
         mDB.insert(NamedDBConst._NAMED_TABLE, null, values);
 
-
-        Cursor cursor = getAll(NamedDBConst._NAMED_TABLE);
-        cursor.close();
+        /*Cursor cursor = getAll(NamedDBConst._NAMED_TABLE);
+        cursor.close();*/
 
         return true;
     }

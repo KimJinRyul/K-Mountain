@@ -68,4 +68,16 @@ public class NamedDBConst {
             etcCourse + " text not null, " +
             flashUrl + " text not null, " +
             videoUrl + " text not null);";
+
+    public final static String _MY_TABLE = "_table_my";
+    public final static String reserved1 = "_reserved1";
+    public final static String reserved2 = "_reserved2";
+    public final static String reserved3 = "_reserved3";
+    public final static String reserved4 = "_reserved4";
+    public final static String _CREATE_MY = "create table " + _MY_TABLE + "(" + _ID + " integer primary key autoincrement, " +
+            code + " text not null, " +
+            reserved1 + " text not null, " +
+            reserved2 + " text not null, " +
+            reserved3 + " text not null, " +
+            reserved4 + " text not null);";
 }

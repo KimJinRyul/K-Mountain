@@ -1,6 +1,7 @@
 package jinryulkim.k_mountain.result;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -10,14 +11,18 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import jinryulkim.k_mountain.CardTouchListener;
 import jinryulkim.k_mountain.CommonUtils;
+import jinryulkim.k_mountain.DB.MyDBManager;
 import jinryulkim.k_mountain.MtInfo_General;
 import jinryulkim.k_mountain.R;
 
@@ -29,6 +34,9 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
     private int mPosition = 0;
     private MtInfo_General mInfo = null;
     private CardTouchListener.CardTouchCallback mCallback = null;
+    private int mListType = ListAdapter.LIST_TYPE_RESULT;
+    private boolean mbAddMy = true;
+    public CardTouchListener mCardTouchListener = null;
 
     private final static int ANIMATION_TIME = 600;
     private final static int MESSAGE_START_ANIMATION = 1000;
@@ -57,6 +65,8 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
     public final static int BTN_ID_SEARCH_MORE  = 1000;
     public final static int BTN_ID_DETAIL       = 1001;
     public final static int BTN_ID_SHARE        = 1002;
+    public final static int BTN_ID_ADDMY        = 1003;
+    public final static int BTN_ID_DELMY        = 1004;
 
     public CardView(Context context, CardTouchListener.CardTouchCallback callback) {
         super(context);
@@ -109,56 +119,79 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
         findViewById(R.id.rlTodaysWeather).setBackgroundResource(CommonUtils.getWeatherIconResId(mInfo.todaysWeather.id));
         ((TextView)findViewById(R.id.tvCurrentTemp)).setText(mInfo.todaysWeather.tempDay + "°C");
 
-        ((ImageView)findViewById(R.id.ivDay1)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(0).id));
-        ((ImageView)findViewById(R.id.ivDay2)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(1).id));
-        ((ImageView)findViewById(R.id.ivDay3)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(2).id));
-        ((ImageView)findViewById(R.id.ivDay4)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(3).id));
-        ((ImageView)findViewById(R.id.ivDay5)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(4).id));
+        try {
+            Date dateSunrise = new Date(mInfo.todaysWeather.sunrise * 1000L);
+            Date dateSunset = new Date(mInfo.todaysWeather.sunset * 1000L);
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+            String strSunRise = sdf.format(dateSunrise);
+            String strSunSet = sdf.format(dateSunset);
 
-        // 1
-        dayOfWeek = ((dayOfWeek + 1) % 8);
-        if(dayOfWeek == 0) dayOfWeek = 1;
-        dayOfMonth += 1;
-        if(dayOfMonth > lastDay) dayOfMonth = 1;
-        setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay1)));
-        ((TextView)findViewById(R.id.tvDay1TempMax)).setText(mInfo.arrWeathers.get(0).tempMax);
-        ((TextView)findViewById(R.id.tvDay1TempMin)).setText(mInfo.arrWeathers.get(0).tempMin);
+            ((TextView)findViewById(R.id.tvSunRise)).setText(mContext.getString(R.string.RESULT_SUNRISE) + strSunRise);
+            ((TextView)findViewById(R.id.tvSunSet)).setText(mContext.getString(R.string.RESULT_SUNSET) + strSunSet);
+            findViewById(R.id.tvSunRise).setVisibility(View.VISIBLE);
+            findViewById(R.id.tvSunSet).setVisibility(View.VISIBLE);
 
-        // 2
-        dayOfWeek = ((dayOfWeek + 1) % 8);
-        if(dayOfWeek == 0) dayOfWeek = 1;
-        dayOfMonth += 1;
-        if(dayOfMonth > lastDay) dayOfMonth = 1;
-        setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay2)));
-        ((TextView)findViewById(R.id.tvDay2TempMax)).setText(mInfo.arrWeathers.get(1).tempMax);
-        ((TextView)findViewById(R.id.tvDay2TempMin)).setText(mInfo.arrWeathers.get(1).tempMin);
+        } catch (Exception e) {
+            ((TextView)findViewById(R.id.tvSunRise)).setText("");
+            ((TextView)findViewById(R.id.tvSunSet)).setText("");
+            findViewById(R.id.tvSunRise).setVisibility(View.GONE);
+            findViewById(R.id.tvSunSet).setVisibility(View.GONE);
+        }
 
-        // 3
-        dayOfWeek = ((dayOfWeek + 1) % 8);
-        if(dayOfWeek == 0) dayOfWeek = 1;
-        dayOfMonth += 1;
-        if(dayOfMonth > lastDay) dayOfMonth = 1;
-        setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay3)));
-        ((TextView)findViewById(R.id.tvDay3TempMax)).setText(mInfo.arrWeathers.get(2).tempMax);
-        ((TextView)findViewById(R.id.tvDay3TempMin)).setText(mInfo.arrWeathers.get(2).tempMin);
+        if(mInfo.arrWeathers != null && mInfo.arrWeathers.size() == 5) {
+            synchronized (mInfo.arrWeathers) {
+                ((ImageView) findViewById(R.id.ivDay1)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(0).id));
+                ((ImageView) findViewById(R.id.ivDay2)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(1).id));
+                ((ImageView) findViewById(R.id.ivDay3)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(2).id));
+                ((ImageView) findViewById(R.id.ivDay4)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(3).id));
+                ((ImageView) findViewById(R.id.ivDay5)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(4).id));
 
-        // 4
-        dayOfWeek = ((dayOfWeek + 1) % 8);
-        if(dayOfWeek == 0) dayOfWeek = 1;
-        dayOfMonth += 1;
-        if(dayOfMonth > lastDay) dayOfMonth = 1;
-        setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay4)));
-        ((TextView)findViewById(R.id.tvDay4TempMax)).setText(mInfo.arrWeathers.get(3).tempMax);
-        ((TextView)findViewById(R.id.tvDay4TempMin)).setText(mInfo.arrWeathers.get(3).tempMin);
+                // 1
+                dayOfWeek = ((dayOfWeek + 1) % 8);
+                if(dayOfWeek == 0) dayOfWeek = 1;
+                dayOfMonth += 1;
+                if(dayOfMonth > lastDay) dayOfMonth = 1;
+                setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay1)));
+                ((TextView)findViewById(R.id.tvDay1TempMax)).setText(mInfo.arrWeathers.get(0).tempMax);
+                ((TextView)findViewById(R.id.tvDay1TempMin)).setText(mInfo.arrWeathers.get(0).tempMin);
 
-        // 5
-        dayOfWeek = ((dayOfWeek + 1) % 8);
-        if(dayOfWeek == 0) dayOfWeek = 1;
-        dayOfMonth += 1;
-        if(dayOfMonth > lastDay) dayOfMonth = 1;
-        setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay5)));
-        ((TextView)findViewById(R.id.tvDay5TempMax)).setText(mInfo.arrWeathers.get(4).tempMax);
-        ((TextView)findViewById(R.id.tvDay5TempMin)).setText(mInfo.arrWeathers.get(4).tempMin);
+                // 2
+                dayOfWeek = ((dayOfWeek + 1) % 8);
+                if(dayOfWeek == 0) dayOfWeek = 1;
+                dayOfMonth += 1;
+                if(dayOfMonth > lastDay) dayOfMonth = 1;
+                setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay2)));
+                ((TextView)findViewById(R.id.tvDay2TempMax)).setText(mInfo.arrWeathers.get(1).tempMax);
+                ((TextView)findViewById(R.id.tvDay2TempMin)).setText(mInfo.arrWeathers.get(1).tempMin);
+
+                // 3
+                dayOfWeek = ((dayOfWeek + 1) % 8);
+                if(dayOfWeek == 0) dayOfWeek = 1;
+                dayOfMonth += 1;
+                if(dayOfMonth > lastDay) dayOfMonth = 1;
+                setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay3)));
+                ((TextView)findViewById(R.id.tvDay3TempMax)).setText(mInfo.arrWeathers.get(2).tempMax);
+                ((TextView)findViewById(R.id.tvDay3TempMin)).setText(mInfo.arrWeathers.get(2).tempMin);
+
+                // 4
+                dayOfWeek = ((dayOfWeek + 1) % 8);
+                if(dayOfWeek == 0) dayOfWeek = 1;
+                dayOfMonth += 1;
+                if(dayOfMonth > lastDay) dayOfMonth = 1;
+                setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay4)));
+                ((TextView)findViewById(R.id.tvDay4TempMax)).setText(mInfo.arrWeathers.get(3).tempMax);
+                ((TextView)findViewById(R.id.tvDay4TempMin)).setText(mInfo.arrWeathers.get(3).tempMin);
+
+                // 5
+                dayOfWeek = ((dayOfWeek + 1) % 8);
+                if(dayOfWeek == 0) dayOfWeek = 1;
+                dayOfMonth += 1;
+                if(dayOfMonth > lastDay) dayOfMonth = 1;
+                setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay5)));
+                ((TextView)findViewById(R.id.tvDay5TempMax)).setText(mInfo.arrWeathers.get(4).tempMax);
+                ((TextView)findViewById(R.id.tvDay5TempMin)).setText(mInfo.arrWeathers.get(4).tempMin);
+            }
+        }
 
         if(animation) {
             findViewById(R.id.rlTodaysWeather).startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.zoom_enter));
@@ -199,8 +232,11 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
         }
     }
 
-    private void init(MtInfo_General info) {
+    private void init(MtInfo_General info, boolean swipe, int listType) {
+        mHandler.removeMessages(MESSAGE_WEATHER_DOWNLOADED);
+
         mInfo = info;
+        mListType = listType;
         removeAllViewsInLayout();
         setOnTouchListener(null);
 
@@ -275,6 +311,24 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
 
             findViewById(R.id.btnDetail).setOnClickListener(this);
             findViewById(R.id.btnShare).setOnClickListener(this);
+            findViewById(R.id.btnMy).setOnClickListener(this);
+
+            MyDBManager myDB = MyDBManager.getInstance(mContext);
+            myDB.open();
+            Cursor cursor = myDB.get(new String [] { mInfo.code });
+            if(cursor != null && cursor.getCount() > 0) {
+                mbAddMy = false;
+                ((Button)findViewById(R.id.btnMy)).setText(R.string.CARD_DELMY);
+                ((Button)findViewById(R.id.btnMy)).setTextColor(0xfff44336);
+            } else {
+                mbAddMy = true;
+                ((Button)findViewById(R.id.btnMy)).setText(R.string.CARD_ADDMY);
+                ((Button)findViewById(R.id.btnMy)).setTextColor(0xff673ab7);
+            }
+
+            cursor.close();
+            myDB.close();
+
         } else {
             LayoutInflater.from(mContext).inflate(R.layout.item_empty, this);
             /*if(MtInfoMgr.totalCnt > MtInfoMgr.mMtInfos.size() + MtInfoMgr.deletedCnt) {
@@ -289,40 +343,56 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
         }
 
         // ready to swipe
-        setOnTouchListener(new CardTouchListener(this, mCallback));
+        if(swipe) {
+            mCardTouchListener = new CardTouchListener(this, mCallback, mListType);
+            setOnTouchListener(mCardTouchListener);
+        }
     }
 
     public int getPosition() {
         return mPosition;
     }
 
-    public void setMtInfo(MtInfo_General mtInfo, int position) {
+    public void setMtInfo(MtInfo_General mtInfo, int position, boolean swipe, int listType) {
+        mCardTouchListener = null;
         mPosition = position;
-        init(mtInfo);
+        init(mtInfo, swipe, listType);
     }
 
     @Override
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.btnDetail:
-                mCallback.onClickBtn(mInfo, mPosition, BTN_ID_DETAIL);
+                mCallback.onClickBtn(mInfo, mPosition, BTN_ID_DETAIL, null);
                 break;
             case R.id.ivProgress:
-                mCallback.onClickBtn(null, -1, BTN_ID_SEARCH_MORE);
+                mCallback.onClickBtn(null, -1, BTN_ID_SEARCH_MORE, null);
                 break;
             case R.id.btnShare:
-                mCallback.onClickBtn(mInfo, mPosition, BTN_ID_SHARE);
+                mCallback.onClickBtn(mInfo, mPosition, BTN_ID_SHARE, null);
+                break;
+            case R.id.btnMy:
+                mCallback.onClickBtn(mInfo, mPosition, mbAddMy ? BTN_ID_ADDMY : BTN_ID_DELMY, mCardTouchListener);
+                if(mbAddMy) {
+                    mbAddMy = false;
+                    ((Button)findViewById(R.id.btnMy)).setText(R.string.CARD_DELMY);
+                    ((Button)findViewById(R.id.btnMy)).setTextColor(0xfff44336);
+                } else {
+                    mbAddMy = true;
+                    ((Button)findViewById(R.id.btnMy)).setText(R.string.CARD_ADDMY);
+                    ((Button)findViewById(R.id.btnMy)).setTextColor(0xff673ab7);
+                }
                 break;
         }
     }
 
-    /**
-     * 각 버튼 등에 OnClickListener등을 사용하지 않고 TouchEvent를 직접 처리해야 하는 이유는
-     * 접힐수 있는 MainUICard 를 사용하기 위해서임.
-     * 만약 OnClickListener를 사용하면 MainUICard 뒤에 숨겨져있는데 클릭이 가능해져 버리는 현상 발생
-     * @param motionEvent
-     * @return
-     */
+/**
+ * 각 버튼 등에 OnClickListener등을 사용하지 않고 TouchEvent를 직접 처리해야 하는 이유는
+ * 접힐수 있는 MainUICard 를 사용하기 위해서임.
+ * 만약 OnClickListener를 사용하면 MainUICard 뒤에 숨겨져있는데 클릭이 가능해져 버리는 현상 발생
+ * @param motionEvent
+ * @return
+ */
 
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
