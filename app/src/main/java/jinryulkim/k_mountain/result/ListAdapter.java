@@ -72,6 +72,7 @@ public class ListAdapter extends BaseAdapter {
 
     public void setData(ArrayList<MtInfo_General> infos) {
         mtInfos = infos;
+        notifyDataSetChanged();
     }
 
     public static MainUICard getMainUICard() {

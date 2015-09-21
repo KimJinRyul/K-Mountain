@@ -38,7 +38,7 @@ public class NamedDBConst {
 
     // table
     public final static String _GEN_TABLE = "_table_general_mt";
-    public final static String _CREATE_GEN = "create table " + _GEN_TABLE + "(" + _ID + " integer primary key autoincrement, " +
+    public final static String _CREATE_GEN = "create table if not exists " + _GEN_TABLE + "(" + _ID + " integer primary key autoincrement, " +
             code + " text not null, " +
             name + " text not null, " +
             sname + " text not null, " +
@@ -52,7 +52,7 @@ public class NamedDBConst {
 
 
     public final static String _NAMED_TABLE = "_table_named_mt";
-    public final static String _CREATE_NAMED = "create table " + _NAMED_TABLE + "(" + _ID + " integer primary key autoincrement, " +
+    public final static String _CREATE_NAMED = "create table if not exists " + _NAMED_TABLE + "(" + _ID + " integer primary key autoincrement, " +
             mntNm + " text not null, " +
             subNm + " text not null, " +
             mntnCd + " text not null, " +
@@ -74,7 +74,7 @@ public class NamedDBConst {
     public final static String reserved2 = "_reserved2";
     public final static String reserved3 = "_reserved3";
     public final static String reserved4 = "_reserved4";
-    public final static String _CREATE_MY = "create table " + _MY_TABLE + "(" + _ID + " integer primary key autoincrement, " +
+    public final static String _CREATE_MY = "create table if not exists " + _MY_TABLE + "(" + _ID + " integer primary key autoincrement, " +
             code + " text not null, " +
             reserved1 + " text not null, " +
             reserved2 + " text not null, " +

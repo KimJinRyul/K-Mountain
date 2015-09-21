@@ -358,6 +358,29 @@ public class CommonUtils {
      //   }
     }
 
+    public static int getWeatherBK(int weatherId) {
+        if(200 <= weatherId && weatherId < 300) {           // thunderstorm
+            return R.drawable.thunder;
+        } else if(300 <= weatherId && weatherId < 400) {    // drizzle
+            return R.drawable.rain;
+        } else if(500 <= weatherId && weatherId < 600) {    // rain
+            return R.drawable.rain;
+        } else if(600 <= weatherId && weatherId < 700) {    // snow
+            return R.drawable.snow;
+        } else if(700 <= weatherId && weatherId < 800) {    // Atmosphere
+            return R.drawable.fog;
+        } else if(800 == weatherId) {
+            return R.drawable.sunny;
+        } else if(801 == weatherId) {
+            return R.drawable.cloud;
+        } else if(802 == weatherId) {
+            return R.drawable.cloudy;
+        } else if(803 == weatherId || 804 == weatherId) {
+            return R.drawable.cloudy;
+        }
+        return R.drawable.sunny;
+    }
+
     public static int getWeatherIconResId(int weatherId) {
         if(200 <= weatherId && weatherId < 300) {           // thunderstorm
             return R.drawable.w11d;
@@ -474,6 +497,20 @@ public class CommonUtils {
             case 6: res = "금"; break;
             case 7: res = "토"; break;
         }
+        return res;
+    }
+
+    public static String getWindDeg(int deg) {
+        String res = "북";
+        if(deg < 22.5) res = "북";
+        else if(deg < 67.5) res = "북동";
+        else if(deg < 112.5) res = "동";
+        else if(deg < 157.5) res = "남동";
+        else if(deg < 202.5) res = "남";
+        else if(deg < 247.5) res = "남서";
+        else if(deg < 292.5) res = "서";
+        else if(deg < 337.4) res = "북서";
+        else res = "북";
         return res;
     }
 }

@@ -12,10 +12,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import java.util.Calendar;
 
 import jinryulkim.k_mountain.CommonUtils;
 import jinryulkim.k_mountain.MtInfo_General;
@@ -35,11 +38,13 @@ public class InfoCard extends LinearLayout implements View.OnClickListener {
     private RelativeLayout mRlDetailExpand = null;
     private LinearLayout mllAdminExpand = null;
 
+    private RelativeLayout mRlWeatherExpand = null;
     private RelativeLayout mRlReasonExpand = null;
     private RelativeLayout mRlTransportExpand = null;
     private RelativeLayout mRlTourismExpand = null;
     private RelativeLayout mRlEtccourceExpand = null;
 
+    private ValueAnimator mWeatherExpandAnimator = null;
     private ValueAnimator mSummaryExpandAnimator = null;
     private ValueAnimator mDetailExpandAnimator = null;
     private ValueAnimator mAdminExpandAnimator = null;
@@ -48,6 +53,8 @@ public class InfoCard extends LinearLayout implements View.OnClickListener {
     private ValueAnimator mTransportExpandAnimator = null;
     private ValueAnimator mTourismExpandAnimator = null;
     private ValueAnimator mEtccourceExpandAnimator = null;
+
+    private int mWeatherSelection = 0;
 
     private final static int MESSAGE_START_ANIMATION = 1000;
     private final static int MESSAGE_READY_TO_EXPAND = 1001;
@@ -59,6 +66,7 @@ public class InfoCard extends LinearLayout implements View.OnClickListener {
                     animate().translationY(0).alpha(1).setDuration(600).setListener(null);
                     break;
                 case MESSAGE_READY_TO_EXPAND:
+                    readyToExpand_weather();
                     if(mInfo.namedInfo == null) {
                         if (mInfo.summary != null && mInfo.summary.length() > 0)                                readyToExpand_summary();
                         if (mInfo.detail != null && mInfo.detail.length() > 0)                                  readyToExpand_detail();
@@ -78,6 +86,41 @@ public class InfoCard extends LinearLayout implements View.OnClickListener {
             }
         }
     };
+
+    private void readyToExpand_weather() {
+        mRlWeatherExpand = (RelativeLayout)findViewById(R.id.rlWeatherExpand);
+        try {
+            mRlWeatherExpand.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    mRlWeatherExpand.getViewTreeObserver().removeOnPreDrawListener(this);
+                    View parent = (View)mRlWeatherExpand.getParent();
+                    final int widthSpec = MeasureSpec.makeMeasureSpec(
+                            parent.getMeasuredWidth() - parent.getPaddingLeft() - parent.getPaddingRight(),
+                            MeasureSpec.AT_MOST);
+                    final int heightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+                    mRlWeatherExpand.measure(widthSpec, heightSpec);
+                    mWeatherExpandAnimator = ValueAnimator.ofInt(0, mRlWeatherExpand.getMeasuredHeight());
+                    mWeatherExpandAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                        @Override
+                        public void onAnimationUpdate(ValueAnimator animator) {
+                            int value = (Integer) animator.getAnimatedValue();
+                            ViewGroup.LayoutParams lp = mRlWeatherExpand.getLayoutParams();
+                            lp.height = value;
+                            mRlWeatherExpand.setLayoutParams(lp);
+                        }
+                    });
+                    ViewGroup.LayoutParams lp = mRlWeatherExpand.getLayoutParams();
+                    lp.height = 0;
+                    mRlWeatherExpand.setLayoutParams(lp);
+                    mRlWeatherExpand.setVisibility(VISIBLE);
+                    return true;
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     private void readyToExpand_summary() {
         mRlSummaryExpand = (RelativeLayout)findViewById(R.id.rlSummaryExpand);
@@ -335,6 +378,142 @@ public class InfoCard extends LinearLayout implements View.OnClickListener {
         mHandler.sendEmptyMessage(MESSAGE_START_ANIMATION);
     }
 
+    private void setDateText(int dayOfWeek, int dayOfMonth, TextView tv) {
+        tv.setText(dayOfMonth + CommonUtils.getDayOfWeek(dayOfWeek));
+        if(dayOfWeek == 7)  tv.setTextColor(0xff0000ff);
+        else if(dayOfWeek == 1) tv.setTextColor(0xffff0000);
+        else tv.setTextColor(0xff000000);
+    }
+
+    private void setWeatherInfo() {
+        findViewById(R.id.ivWeatherProgress).clearAnimation();
+        findViewById(R.id.ivWeatherProgress).setVisibility(View.GONE);
+        findViewById(R.id.tvWeatherLoading).setVisibility(View.GONE);
+
+        Calendar cal = Calendar.getInstance();
+        int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);   // 오늘 날짜
+        int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);      // 일요일 = 1
+        int lastDay = cal.getActualMaximum(Calendar.DATE);  // 이번달 마지막 날
+
+        ((ImageView) findViewById(R.id.ivDay1)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(0).id));
+        ((ImageView) findViewById(R.id.ivDay2)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(1).id));
+        ((ImageView) findViewById(R.id.ivDay3)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(2).id));
+        ((ImageView) findViewById(R.id.ivDay4)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(3).id));
+        ((ImageView) findViewById(R.id.ivDay5)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(4).id));
+
+        // 1
+        setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay1)));
+        ((TextView)findViewById(R.id.tvDay1TempMax)).setText(mInfo.arrWeathers.get(0).tempMax);
+        ((TextView)findViewById(R.id.tvDay1TempMin)).setText(mInfo.arrWeathers.get(0).tempMin);
+
+        // 2
+        dayOfWeek = ((dayOfWeek + 1) % 8);
+        if(dayOfWeek == 0) dayOfWeek = 1;
+        dayOfMonth += 1;
+        if(dayOfMonth > lastDay) dayOfMonth = 1;
+        setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay2)));
+        ((TextView)findViewById(R.id.tvDay2TempMax)).setText(mInfo.arrWeathers.get(1).tempMax);
+        ((TextView)findViewById(R.id.tvDay2TempMin)).setText(mInfo.arrWeathers.get(1).tempMin);
+
+        // 3
+        dayOfWeek = ((dayOfWeek + 1) % 8);
+        if(dayOfWeek == 0) dayOfWeek = 1;
+        dayOfMonth += 1;
+        if(dayOfMonth > lastDay) dayOfMonth = 1;
+        setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay3)));
+        ((TextView)findViewById(R.id.tvDay3TempMax)).setText(mInfo.arrWeathers.get(2).tempMax);
+        ((TextView)findViewById(R.id.tvDay3TempMin)).setText(mInfo.arrWeathers.get(2).tempMin);
+
+        // 4
+        dayOfWeek = ((dayOfWeek + 1) % 8);
+        if(dayOfWeek == 0) dayOfWeek = 1;
+        dayOfMonth += 1;
+        if(dayOfMonth > lastDay) dayOfMonth = 1;
+        setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay4)));
+        ((TextView)findViewById(R.id.tvDay4TempMax)).setText(mInfo.arrWeathers.get(3).tempMax);
+        ((TextView)findViewById(R.id.tvDay4TempMin)).setText(mInfo.arrWeathers.get(3).tempMin);
+
+        // 5
+        dayOfWeek = ((dayOfWeek + 1) % 8);
+        if(dayOfWeek == 0) dayOfWeek = 1;
+        dayOfMonth += 1;
+        if(dayOfMonth > lastDay) dayOfMonth = 1;
+        setDateText(dayOfWeek, dayOfMonth, ((TextView) findViewById(R.id.tvDay5)));
+        ((TextView)findViewById(R.id.tvDay5TempMax)).setText(mInfo.arrWeathers.get(4).tempMax);
+        ((TextView)findViewById(R.id.tvDay5TempMin)).setText(mInfo.arrWeathers.get(4).tempMin);
+
+        selectWeatherDay(0);
+        findViewById(R.id.rlDay1).setOnClickListener(this);
+        findViewById(R.id.rlDay2).setOnClickListener(this);
+        findViewById(R.id.rlDay3).setOnClickListener(this);
+        findViewById(R.id.rlDay4).setOnClickListener(this);
+        findViewById(R.id.rlDay5).setOnClickListener(this);
+
+        findViewById(R.id.llWeathers).startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in));
+        findViewById(R.id.llWeathers).setVisibility(VISIBLE);
+
+        /*findViewById(R.id.ivSelectedWeatherIcon).setVisibility(VISIBLE);
+        findViewById(R.id.tvSelectedWeatherDescription).setVisibility(VISIBLE);
+        findViewById(R.id.llSelectedWeathers).setVisibility(VISIBLE);*/
+    }
+
+    private void selectWeatherDay(int day) {
+        mWeatherSelection = day;
+        findViewById(R.id.rlDay1).setBackgroundColor(0xffbdbdbd);
+        findViewById(R.id.rlDay2).setBackgroundColor(0xffbdbdbd);
+        findViewById(R.id.rlDay3).setBackgroundColor(0xffbdbdbd);
+        findViewById(R.id.rlDay4).setBackgroundColor(0xffbdbdbd);
+        findViewById(R.id.rlDay5).setBackgroundColor(0xffbdbdbd);
+
+        switch(day) {
+            case 0: findViewById(R.id.rlDay1).setBackgroundColor(0xffffffff);   break;
+            case 1: findViewById(R.id.rlDay2).setBackgroundColor(0xffffffff);   break;
+            case 2: findViewById(R.id.rlDay3).setBackgroundColor(0xffffffff);   break;
+            case 3: findViewById(R.id.rlDay4).setBackgroundColor(0xffffffff);   break;
+            case 4: findViewById(R.id.rlDay5).setBackgroundColor(0xffffffff);   break;
+        }
+
+        ((ImageView)findViewById(R.id.ivWeatherBK)).setImageResource(CommonUtils.getWeatherBK(mInfo.arrWeathers.get(day).id));
+        ((TextView)findViewById(R.id.tvSelectedWeatherDescription)).setText(CommonUtils.getWeatherText(mInfo.arrWeathers.get(day).id));
+
+        ((TextView)findViewById(R.id.tvSelectedWeatherPressure)).setText(
+                String.format(mContext.getString(R.string.DETAIL_WEATHER_PRESSURE), mInfo.arrWeathers.get(day).pressure));
+        if(mInfo.arrWeathers.get(day).rain != null || mInfo.arrWeathers.get(day).snow != null) {
+            ((TextView) findViewById(R.id.tvSelectedWeatherHumidity)).setText(
+                    String.format(mContext.getString(R.string.DETAIL_WEATHER_HUMIDITY), "100"));
+        } else {
+            ((TextView) findViewById(R.id.tvSelectedWeatherHumidity)).setText(
+                    String.format(mContext.getString(R.string.DETAIL_WEATHER_HUMIDITY), mInfo.arrWeathers.get(day).humidity));
+        }
+        ((TextView)findViewById(R.id.tvSelectedWeatherTemp)).setText(
+                String.format(mContext.getString(R.string.DETAIL_WEATHER_TEMP), mInfo.arrWeathers.get(day).tempMorn, mInfo.arrWeathers.get(day).tempDay, mInfo.arrWeathers.get(day).tempEve, mInfo.arrWeathers.get(day).tempNight));
+        ((TextView)findViewById(R.id.tvSelectedWeatherTempMinMax)).setText(
+                String.format(mContext.getString(R.string.DETAIL_WEATHER_TEMP_MINMAX), mInfo.arrWeathers.get(day).tempMin, mInfo.arrWeathers.get(day).tempMax));
+        ((TextView)findViewById(R.id.tvSelectedWeatherCloud)).setText(
+                String.format(mContext.getString(R.string.DETAIL_WEATHER_CLOUD), mInfo.arrWeathers.get(day).clouds));
+        ((TextView)findViewById(R.id.tvSelectedWeatherWind)).setText(
+                String.format(mContext.getString(R.string.DETAIL_WEATHER_WIND), mInfo.arrWeathers.get(day).windSpeed, mInfo.arrWeathers.get(day).windDegree, CommonUtils.getWindDeg(mInfo.arrWeathers.get(day).windDegree)));
+
+        if(mInfo.arrWeathers.get(day).rain != null && mInfo.arrWeathers.get(day).rain.trim().length() > 0) {
+            ((TextView)findViewById(R.id.tvSelectedWeatherRain)).setText(
+                    String.format(mContext.getString(R.string.DETAIL_WEATHER_RAIN), mInfo.arrWeathers.get(day).rain));
+            findViewById(R.id.tvSelectedWeatherRain).setVisibility(VISIBLE);
+        } else {
+            findViewById(R.id.tvSelectedWeatherRain).setVisibility(GONE);
+        }
+
+        if(mInfo.arrWeathers.get(day).snow != null && mInfo.arrWeathers.get(day).snow.trim().length() > 0) {
+            ((TextView)findViewById(R.id.tvSelectedWeatherSnow)).setText(
+                    String.format(mContext.getString(R.string.DETAIL_WEATHER_SNOW), mInfo.arrWeathers.get(day).snow));
+            findViewById(R.id.tvSelectedWeatherSnow).setVisibility(VISIBLE);
+        } else {
+            findViewById(R.id.tvSelectedWeatherSnow).setVisibility(GONE);
+        }
+        /*
+        ((ImageView)findViewById(R.id.ivSelectedWeatherIcon)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(day).id));
+        */
+    }
+
     private void init(MtInfo_General info) {
         mInfo = info;
         mInfo.initExpands();
@@ -360,6 +539,16 @@ public class InfoCard extends LinearLayout implements View.OnClickListener {
         } else {
             findViewById(R.id.rlAdmin).setVisibility(GONE);
         }
+
+        if(mInfo.weatherinfo == true) {
+            setWeatherInfo();
+        } else {
+            findViewById(R.id.rlTodaysWeather).setVisibility(GONE);
+            findViewById(R.id.ivWeatherProgress).startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate));
+            findViewById(R.id.ivWeatherProgress).setVisibility(VISIBLE);
+            mInfo.requestWeatherInfo(mContext);
+        }
+        findViewById(R.id.rlWeather).setOnClickListener(this);
 
         if(mInfo.namedInfo == null) {
 
@@ -511,6 +700,35 @@ public class InfoCard extends LinearLayout implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.rlDay1:   selectWeatherDay(0);    break;
+            case R.id.rlDay2:   selectWeatherDay(1);    break;
+            case R.id.rlDay3:   selectWeatherDay(2);    break;
+            case R.id.rlDay4:   selectWeatherDay(3);    break;
+            case R.id.rlDay5:   selectWeatherDay(4);    break;
+            case R.id.rlWeather:
+                if(mInfo.weather_expanded == true) {
+                    mWeatherExpandAnimator.end();
+                    ValueAnimator va = ValueAnimator.ofInt(mRlWeatherExpand.getHeight(), 0);
+                    va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
+                        @Override
+                        public void onAnimationUpdate(ValueAnimator animator) {
+                            int value = (Integer)animator.getAnimatedValue();
+                            ViewGroup.LayoutParams lp = mRlWeatherExpand.getLayoutParams();
+                            lp.height = value;
+                            mRlWeatherExpand.setLayoutParams(lp);
+                        }
+                    });
+                    va.start();
+                    ((ImageView)findViewById(R.id.ivIconWeatherEx)).setImageResource(R.drawable.ic_expand_more_white);
+                    mInfo.weather_expanded = false;
+                } else {
+                    if (mWeatherExpandAnimator != null) {
+                        mWeatherExpandAnimator.start();
+                        mInfo.weather_expanded = true;
+                        ((ImageView)findViewById(R.id.ivIconWeatherEx)).setImageResource(R.drawable.ic_expand_less_white);
+                    }
+                }
+                break;
             case R.id.rlSummary:
                 if(mInfo.summary_expanded == true) {
                     mSummaryExpandAnimator.end();

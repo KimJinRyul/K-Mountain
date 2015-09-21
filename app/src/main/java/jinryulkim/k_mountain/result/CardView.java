@@ -147,10 +147,6 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
                 ((ImageView) findViewById(R.id.ivDay5)).setImageResource(CommonUtils.getWeatherIconResId(mInfo.arrWeathers.get(4).id));
 
                 // 1
-                dayOfWeek = ((dayOfWeek + 1) % 8);
-                if(dayOfWeek == 0) dayOfWeek = 1;
-                dayOfMonth += 1;
-                if(dayOfMonth > lastDay) dayOfMonth = 1;
                 setDateText(dayOfWeek, dayOfMonth, ((TextView)findViewById(R.id.tvDay1)));
                 ((TextView)findViewById(R.id.tvDay1TempMax)).setText(mInfo.arrWeathers.get(0).tempMax);
                 ((TextView)findViewById(R.id.tvDay1TempMin)).setText(mInfo.arrWeathers.get(0).tempMin);

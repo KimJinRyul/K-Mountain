@@ -39,6 +39,16 @@
     <string name="TOAST_HELP_NO_PERMISSION">위치정보 관련 권한이 꺼져있어 사용이 불가합니다.\n권한 부여 후 다시 시도해 주세요.</string>
     <string name="TOAST_NO_GPS">현재 위치정보를 획득하지 못했습니다. 위치정보 기능을 켜주세요.</string>
 
+    <string name="DETAIL_WEATHER">날씨</string>
+
+    <string name="DETAIL_WEATHER_PRESSURE">기압: %shPa</string>
+    <string name="DETAIL_WEATHER_HUMIDITY">습도: %s%%</string>
+    <string name="DETAIL_WEATHER_CLOUD">구름의 양: %s%%</string>
+    <string name="DETAIL_WEATHER_WIND">바람 세기: %1$sm/sec 방향: %2$d(%3$s)</string>
+    <string name="DETAIL_WEATHER_TEMP">아침기온:%1$s°C 낮기온:%2$s°C 저녁기온:%3$s°C 밤기온:%4$s°C</string>
+    <string name="DETAIL_WEATHER_TEMP_MINMAX">최저기온:%1$s°C 최고기온:%2$s°C</string>
+    <string name="DETAIL_WEATHER_RAIN">강우량: %smm</string>
+    <string name="DETAIL_WEATHER_SNOW">적설량: %smm</string>
     <string name="DETAIL_SUMMARY">개요</string>
     <string name="DETAIL_DETAIL">상세내용</string>
     <string name="DETAIL_ADMIN">연락처</string>

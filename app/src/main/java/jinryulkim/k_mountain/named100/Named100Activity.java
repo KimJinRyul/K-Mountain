@@ -32,6 +32,7 @@ import jinryulkim.k_mountain.result.MainUICard;
 public class Named100Activity extends Activity implements ListAdapter.CardListener, View.OnClickListener {
     private ListAdapter mListAdapter = null;
     private ListView mListView = null;
+    private ArrayList<MtInfo_General>mMtInfo = new ArrayList<MtInfo_General>();
 
     private static Named100Handler mHandler = null;
     private final static int MESSAGE_LOAD_FINISHED  = 1000;
@@ -99,7 +100,8 @@ public class Named100Activity extends Activity implements ListAdapter.CardListen
         switch(msg.what) {
             case MESSAGE_LOADING:
             case MESSAGE_LOAD_FINISHED:
-                mListAdapter.notifyDataSetChanged();
+                mMtInfo = (ArrayList<MtInfo_General>) MtInfoMgr.mMtInfos.clone();
+                mListAdapter.setData(mMtInfo);
                 break;
         }
     }
@@ -115,9 +117,10 @@ public class Named100Activity extends Activity implements ListAdapter.CardListen
         findViewById(R.id.btnBack).setOnClickListener(this);
 
         MtInfoMgr.mMtInfos.clear();
+        mMtInfo.clear();
 
         mListView = (ListView)findViewById(R.id.lvResults);
-        mListAdapter = new ListAdapter(this, this, MtInfoMgr.mMtInfos, false, ListAdapter.LIST_100);
+        mListAdapter = new ListAdapter(this, this, mMtInfo, false, ListAdapter.LIST_100);
         mListView.setAdapter(mListAdapter);
 
         loadThread();

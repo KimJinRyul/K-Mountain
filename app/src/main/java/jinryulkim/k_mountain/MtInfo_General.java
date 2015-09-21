@@ -78,6 +78,7 @@ public class MtInfo_General {
     public boolean weatherinfo = false;
     private boolean weatherloading = false;
 
+    public boolean weather_expanded = false;
     public boolean admin_expanded = false;
     public boolean summary_expanded = false;
     public boolean detail_expanded = false;
@@ -88,6 +89,7 @@ public class MtInfo_General {
     public boolean etccource_expanded = false;
 
     public void initExpands() {
+        weather_expanded = false;
         admin_expanded = false;
         summary_expanded = false;
         detail_expanded = false;

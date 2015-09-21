@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -35,6 +34,7 @@ import jinryulkim.k_mountain.result.MainUICard;
 public class MyActivity extends Activity implements ListAdapter.CardListener, View.OnClickListener {
     private ListAdapter mListAdapter = null;
     private ListView mListView = null;
+    private ArrayList<MtInfo_General>mMtInfo = new ArrayList<MtInfo_General>();
     public static boolean mCardDismissingNow = false;
 
     private static MyHandler mHandler = null;
@@ -73,7 +73,8 @@ public class MyActivity extends Activity implements ListAdapter.CardListener, Vi
         myDB.delete(info.code);
         myDB.close();
 
-        MtInfoMgr.mMtInfos.remove(position);
+        MtInfoMgr.mMtInfos.remove(info);
+        mMtInfo.remove(info);
         mListAdapter.notifyDataSetChanged();
         mCardDismissingNow = false;
 
@@ -113,7 +114,8 @@ public class MyActivity extends Activity implements ListAdapter.CardListener, Vi
         switch(msg.what) {
             case MESSAGE_LOADING:
             case MESSAGE_LOAD_FINISHED:
-                mListAdapter.notifyDataSetChanged();
+                mMtInfo = (ArrayList<MtInfo_General>) MtInfoMgr.mMtInfos.clone();
+                mListAdapter.setData(mMtInfo);
                 break;
         }
     }
@@ -129,9 +131,10 @@ public class MyActivity extends Activity implements ListAdapter.CardListener, Vi
         findViewById(R.id.btnBack).setOnClickListener(this);
 
         MtInfoMgr.mMtInfos.clear();
+        mMtInfo.clear();
 
         mListView = (ListView)findViewById(R.id.lvResults);
-        mListAdapter = new ListAdapter(this, this, MtInfoMgr.mMtInfos, true, ListAdapter.LIST_MY);
+        mListAdapter = new ListAdapter(this, this, mMtInfo, true, ListAdapter.LIST_MY);
         mListView.setAdapter(mListAdapter);
 
         loadThread();
@@ -159,10 +162,8 @@ public class MyActivity extends Activity implements ListAdapter.CardListener, Vi
                     db.openReadonly(CommonUtils.getDBPath(MyActivity.this));
 
                     Cursor myC = mydb.getAll();
-                    Log.i("jrkim", "myCnt:" + myC.getCount());
                     while(myC.moveToNext()) {
                         String code = myC.getString(myC.getColumnIndex(NamedDBConst.code)).trim();
-                        Log.i("jrkim", "code: " + code);
                         Cursor curGen = db.get(NamedDBConst._GEN_TABLE, NamedDBConst.code, new String[] {code});
                         if(curGen.getCount() == 1) {
                             curGen.moveToFirst();
@@ -229,7 +230,6 @@ public class MyActivity extends Activity implements ListAdapter.CardListener, Vi
                             }
                             namedC.close();
                             MtInfoMgr.mMtInfos.add(mtInfo);
-                            Log.i("jrkim", "added");
                             mHandler.sendEmptyMessage(MESSAGE_LOADING);
                         }
                         curGen.close();
@@ -240,7 +240,6 @@ public class MyActivity extends Activity implements ListAdapter.CardListener, Vi
                 } catch ( Exception e) {
                     e.printStackTrace();
                 }
-                Log.i("jrkim", "finish");
                 mHandler.sendEmptyMessage(MESSAGE_LOAD_FINISHED);
             }
         }.start();
