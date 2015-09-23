@@ -244,5 +244,4 @@ public class MyActivity extends Activity implements ListAdapter.CardListener, Vi
             }
         }.start();
     }
-
 }

@@ -1,5 +1,6 @@
 package jinryulkim.k_mountain;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -8,10 +9,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.telephony.SmsManager;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -512,5 +516,11 @@ public class CommonUtils {
         else if(deg < 337.4) res = "북서";
         else res = "북";
         return res;
+    }
+
+    public static void sendSMS(Context context, String number, String text) {
+        Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+        SmsManager smsManager = SmsManager.getDefault();
+        smsManager.sendTextMessage(number, null, text, null, null);
     }
 }

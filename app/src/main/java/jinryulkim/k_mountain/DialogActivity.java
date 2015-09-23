@@ -24,6 +24,7 @@ public class DialogActivity extends Activity implements View.OnClickListener {
 
     private int mDlgType = DLGTYPE_NOTHING;
     private boolean mbAnswered = false;
+    public static boolean mbLaunched = false;
 
     public static void launchDialog(Context context, int type, int reqCode) {
         Intent i = new Intent(context, DialogActivity.class);
@@ -36,6 +37,8 @@ public class DialogActivity extends Activity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dlg);
+
+        mbLaunched = true;
 
         CommonUtils.typeface = Typeface.createFromAsset(getAssets(), "fonts/Roboto-Regular.ttf");
         CommonUtils.setGlobalFont(getWindow().getDecorView(), CommonUtils.typeface);
@@ -78,6 +81,7 @@ public class DialogActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void finish() {
+        mbLaunched = false;
         super.finish();
         overridePendingTransition(0, R.anim.zoom_exit);
     }

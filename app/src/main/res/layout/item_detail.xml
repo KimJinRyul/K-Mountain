@@ -375,30 +375,32 @@
                 </LinearLayout>
             </RelativeLayout>
         </LinearLayout>
-        <ImageView
-            android:id="@+id/ivWeatherProgress"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginTop="18dp"
-            android:layout_centerHorizontal="true"
-            android:src="@drawable/ic_autorenew_white"/>
-
-        <TextView
-            android:id="@+id/tvWeatherLoading"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/ivWeatherProgress"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="4dp"
-            android:textColor="#fff"
-            android:textSize="10dp"
-            android:text="@string/RESULT_WEATHER_LOADING"/>
+            android:orientation="vertical"
+            android:layout_centerInParent="true"
+            android:gravity="center_horizontal">
+            <ImageView
+                android:id="@+id/ivWeatherProgress"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_autorenew_white"/>
+            <TextView
+                android:id="@+id/tvWeatherLoading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#fff"
+                android:textSize="10dp"
+                android:text="@string/RESULT_WEATHER_LOADING"/>
+        </LinearLayout>
+
         </RelativeLayout>
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/rlWeatherBk"
-            android:visibility="visible">
+            android:layout_below="@id/rlWeatherBk">
 
             <ImageView
                 android:id="@+id/ivWeatherBK"
@@ -495,17 +497,6 @@
                     android:text="@string/DETAIL_WEATHER_SNOW"/>
 
             </LinearLayout>
-            <!--
-            <ImageView
-                android:id="@+id/ivSelectedWeatherIcon"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/w02d"/>
-
-
-
-
-            -->
         </RelativeLayout>
     </RelativeLayout>
 

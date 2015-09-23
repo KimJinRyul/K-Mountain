@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 
+import jinryulkim.k_mountain.MtInfoMgr;
 import jinryulkim.k_mountain.MtInfo_General;
 
 /**
@@ -108,6 +109,8 @@ public class DetailAdapter extends BaseAdapter {
                     if(convertView != null) {
                         ((InfoCard)convertView).setMtInfo(mInfo, mPosition);
                         ((InfoCard)convertView).startAnimation();
+                        mInfo.cardview = null;
+                        mInfo.infoCard = (InfoCard)convertView;
                     }
                 }
 

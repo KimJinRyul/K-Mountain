@@ -7,6 +7,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -58,6 +59,8 @@ public class InfoCard extends LinearLayout implements View.OnClickListener {
 
     private final static int MESSAGE_START_ANIMATION = 1000;
     private final static int MESSAGE_READY_TO_EXPAND = 1001;
+    private final static int MESSAGE_IMAGE_DOWNLOADED = 1002;
+    private final static int MESSAGE_WEATHER_DOWNLOADED = 1003;
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -82,6 +85,12 @@ public class InfoCard extends LinearLayout implements View.OnClickListener {
                         if (mInfo.namedInfo.tourismInfo != null && mInfo.namedInfo.tourismInfo.length() > 0)    readyToExpand_tourism();
                         if (mInfo.namedInfo.etcCource != null && mInfo.namedInfo.etcCource.length() > 0)        readyToExpand_etcCource();
                     }
+                    break;
+                case MESSAGE_IMAGE_DOWNLOADED:
+                    //setDownloadedImage();
+                    break;
+                case MESSAGE_WEATHER_DOWNLOADED:
+                    setWeatherInfo();
                     break;
             }
         }
@@ -386,8 +395,18 @@ public class InfoCard extends LinearLayout implements View.OnClickListener {
     }
 
     private void setWeatherInfo() {
+        Log.i("jrkim", "InfoCard.setWeatherInfo");
         findViewById(R.id.ivWeatherProgress).clearAnimation();
         findViewById(R.id.ivWeatherProgress).setVisibility(View.GONE);
+
+        if(mInfo.weatherinfo == false || mInfo.arrWeathers == null || mInfo.arrWeathers.size() != 5) {
+            findViewById(R.id.tvWeatherLoading).setVisibility(View.VISIBLE);
+            ((TextView)findViewById(R.id.tvWeatherLoading)).setText(R.string.RESULT_WEATHER_ERROR);
+            findViewById(R.id.tvSelectedWeatherDescription).setVisibility(GONE);
+            findViewById(R.id.llSelectedWeathers).setVisibility(GONE);
+            return;
+        }
+
         findViewById(R.id.tvWeatherLoading).setVisibility(View.GONE);
 
         Calendar cal = Calendar.getInstance();
@@ -515,6 +534,9 @@ public class InfoCard extends LinearLayout implements View.OnClickListener {
     }
 
     private void init(MtInfo_General info) {
+        mHandler.removeMessages(MESSAGE_IMAGE_DOWNLOADED);
+        mHandler.removeMessages(MESSAGE_WEATHER_DOWNLOADED);
+
         mInfo = info;
         mInfo.initExpands();
 
@@ -541,9 +563,10 @@ public class InfoCard extends LinearLayout implements View.OnClickListener {
         }
 
         if(mInfo.weatherinfo == true) {
+            Log.i("jrkim", "InfoCard 날씨정보 있넹..");
             setWeatherInfo();
         } else {
-            findViewById(R.id.rlTodaysWeather).setVisibility(GONE);
+            Log.i("jrkim", "InfoCard - No Weather Info yet");
             findViewById(R.id.ivWeatherProgress).startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate));
             findViewById(R.id.ivWeatherProgress).setVisibility(VISIBLE);
             mInfo.requestWeatherInfo(mContext);
@@ -696,6 +719,11 @@ public class InfoCard extends LinearLayout implements View.OnClickListener {
         mPosition = position;
         init(mtInfo);
     }
+
+    public void downloadCompleted() {
+        mHandler.sendEmptyMessage(MESSAGE_IMAGE_DOWNLOADED);
+    }
+    public void weatherCompleted() {  mHandler.sendEmptyMessage(MESSAGE_WEATHER_DOWNLOADED); }
 
     @Override
     public void onClick(View v) {

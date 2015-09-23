@@ -136,15 +136,16 @@ public class ListAdapter extends BaseAdapter {
 
                     if(convertView != null) {
                         // 기존에 참조하고 있던 정보를 초기화 하야 준다.
-                        for(int i = 0; i < MtInfoMgr.mMtInfos.size(); i++) {
-                            if(MtInfoMgr.mMtInfos.get(i).cardview == convertView) {
-                                MtInfoMgr.mMtInfos.get(i).cardview = null;
+                        for(int i = 0; i < mtInfos.size(); i++) {
+                            if(mtInfos.get(i).cardview == convertView) {
+                                mtInfos.get(i).cardview = null;
                                 break;
                             }
                         }
 
                         ((CardView)convertView).setMtInfo(info, position, mSwipe, mListType);
                         info.cardview = (CardView)convertView;
+                        info.infoCard = null;
 
                         if(info.animated == false) {
                             ((CardView)convertView).startAnimationWithDelay(0);

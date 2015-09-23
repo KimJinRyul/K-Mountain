@@ -10,9 +10,18 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import jinryulkim.k_mountain.CommonUtils;
 import jinryulkim.k_mountain.DialogActivity;
@@ -28,14 +37,41 @@ public class HelpActivity extends Activity implements View.OnClickListener {
     private boolean mbNETProvider = false;
     private final static int REQCODE_GPSOFF = 100;
     private Location mCurrentLocation = null;
+    private String mOldAddress = "";
+    private String mNewAddress = "";
+
+    private final static int MESSAGE_GETADDRESS = 1000;
+    public void handleMessage(Message msg) {
+        switch(msg.what) {
+            case MESSAGE_GETADDRESS:
+                findViewById(R.id.btnFire).setEnabled(true);
+                findViewById(R.id.btnHelpMe).setEnabled(true);
+                hideProgress();
+                break;
+        }
+    }
+
+    private static HelpHandler mHandler = null;
+    static class HelpHandler extends Handler {
+        private final WeakReference<HelpActivity> mActivity;
+        HelpHandler(HelpActivity activity) {
+            mActivity = new WeakReference<HelpActivity>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            HelpActivity activity = mActivity.get();
+            if(activity != null)
+                activity.handleMessage(msg);
+        }
+    };
 
     private LocationListener mLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
             mCurrentLocation = location;
             if(mCurrentLocation != null) {
-                findViewById(R.id.btnFire).setEnabled(true);
-                findViewById(R.id.btnHelpMe).setEnabled(true);
+                requestAddress();
             }
         }
 
@@ -70,6 +106,8 @@ public class HelpActivity extends Activity implements View.OnClickListener {
 
         setContentView(R.layout.activity_119);
 
+        mHandler = new HelpHandler(this);
+
         CommonUtils.typeface = Typeface.createFromAsset(getAssets(), "fonts/Roboto-Regular.ttf");
         CommonUtils.setGlobalFont(getWindow().getDecorView(), CommonUtils.typeface);
 
@@ -82,23 +120,19 @@ public class HelpActivity extends Activity implements View.OnClickListener {
         mbGPSProvider = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         mbNETProvider = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 10, mLocationListener);
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 10, mLocationListener);
-
         if(!mbGPSProvider && !mbNETProvider) {
             DialogActivity.launchDialog(this, DialogActivity.DLGTYPE_GPSOFF, REQCODE_GPSOFF);
         }
 
-        if(mbGPSProvider) {
-            mCurrentLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        } else if(mbNETProvider) {
-            mCurrentLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        }
+        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 10, mLocationListener);
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 10, mLocationListener);
 
-        if(mCurrentLocation != null) {
-            findViewById(R.id.btnFire).setEnabled(true);
-            findViewById(R.id.btnHelpMe).setEnabled(true);
-        }
+        showProgress();
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
     }
 
     @Override
@@ -108,6 +142,8 @@ public class HelpActivity extends Activity implements View.OnClickListener {
             case REQCODE_GPSOFF:
                 if (resCode == DialogActivity.RESCODE_POSITIVE) {
                     startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                } else {
+                    finish();
                 }
                 break;
         }
@@ -145,8 +181,8 @@ public class HelpActivity extends Activity implements View.OnClickListener {
             case R.id.btnFire:
                 if(mCurrentLocation != null) {
                     strMessage = String.format(getString(R.string.HELP_FIRE_MESSAGE),
-                            mCurrentLocation.getLatitude() + "", mCurrentLocation.getLongitude() + "");
-                    Toast.makeText(this, strMessage, Toast.LENGTH_SHORT).show();
+                            mCurrentLocation.getLatitude() + "", mCurrentLocation.getLongitude() + "", mNewAddress.length() > 0 ? mNewAddress : mOldAddress);
+                    CommonUtils.sendSMS(this, "119", strMessage);
                     finish();
                 } else {
                     Toast.makeText(this, strMessage, Toast.LENGTH_SHORT).show();
@@ -155,8 +191,8 @@ public class HelpActivity extends Activity implements View.OnClickListener {
             case R.id.btnHelpMe:
                 if(mCurrentLocation != null) {
                     strMessage = String.format(getString(R.string.HELP_SAFE_MESSAGE),
-                            mCurrentLocation.getLatitude() + "", mCurrentLocation.getLongitude() + "");
-                    Toast.makeText(this, strMessage, Toast.LENGTH_SHORT).show();
+                            mCurrentLocation.getLatitude() + "", mCurrentLocation.getLongitude() + "", mNewAddress.length() > 0 ? mNewAddress : mOldAddress);
+                    CommonUtils.sendSMS(this, "119", strMessage);
                     finish();
                 } else {
                     Toast.makeText(this, strMessage, Toast.LENGTH_SHORT).show();
@@ -165,9 +201,58 @@ public class HelpActivity extends Activity implements View.OnClickListener {
         }
     }
 
+    private void requestAddress() {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    String addr = "https://apis.daum.net/local/geo/coord2detailaddr?apikey=ffa4604fc5f73524b415b4ffde795fa7&x="+
+                            mCurrentLocation.getLongitude() + "&y="+ mCurrentLocation.getLatitude() + "&inputCoordSystem=WGS84&output=xml";
+
+                    URL url = new URL(addr);
+
+                    HttpURLConnection con = (HttpURLConnection)url.openConnection();
+                    con.setRequestMethod("GET");
+                    con.setRequestProperty("User-Agent", "Mozilla/5.0");
+                    int responseCode = con.getResponseCode();
+
+                    if(responseCode == 200) {
+                        BufferedReader br = new BufferedReader( new InputStreamReader(con.getInputStream()));
+                        String line = "";
+                        String strXML = "";
+
+                        while((line = br.readLine()) != null) {
+                            strXML += line;
+                        }
+
+                        strXML = strXML.substring(strXML.indexOf("<old><name value="));
+                        mOldAddress = strXML.substring(18, strXML.indexOf("/>") - 1);
+                        strXML = strXML.substring(strXML.indexOf("<new><name value="));
+                        mNewAddress = strXML.substring(18, strXML.indexOf("/>") - 1);
+
+                        br.close();
+                        mHandler.sendEmptyMessage(MESSAGE_GETADDRESS);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
+
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, R.anim.zoom_exit);
+    }
+
+    private void showProgress() {
+        findViewById(R.id.ivProgress).startAnimation(AnimationUtils.loadAnimation(this, R.anim.rotate));
+        findViewById(R.id.rlProgress).setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgress() {
+        findViewById(R.id.ivProgress).clearAnimation();
+        findViewById(R.id.rlProgress).setVisibility(View.GONE);
     }
 }

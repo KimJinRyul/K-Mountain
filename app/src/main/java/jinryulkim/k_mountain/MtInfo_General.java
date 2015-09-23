@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.zip.GZIPInputStream;
 
+import jinryulkim.k_mountain.detail.InfoCard;
 import jinryulkim.k_mountain.result.CardView;
 
 /**
@@ -37,6 +38,7 @@ public class MtInfo_General {
     public ArrayList<String> imagePaths = null;  // 산이미지
     public MtInfo_Named namedInfo = null;        // 100대 명산 정보
     public CardView cardview = null;      // CardView
+    public InfoCard infoCard = null;
     public boolean animated = false;      // 최초 생성시 1번만 aniamtion
     public boolean downloaded = false;
     private boolean loading = false;
@@ -57,6 +59,7 @@ public class MtInfo_General {
             windDegree = -1;
             dt = -1;
             sunrise = sunset = 0;
+            weatherinfo = false;
         }
         public int id;                 // 날씨 코드
         public long dt;                // 예보시간UTC
@@ -89,6 +92,7 @@ public class MtInfo_General {
     public boolean etccource_expanded = false;
 
     public void initExpands() {
+        weatherinfo = false;
         weather_expanded = false;
         admin_expanded = false;
         summary_expanded = false;
@@ -344,11 +348,14 @@ public class MtInfo_General {
 
                     } else {
                         // ... 시무룩....
+                        Log.i("jrkim", "시무룩...");
                     }
+                    Log.i("jrkim", "날씨정보 획득 성공?!");
                     success = true;
 
                 } catch(Exception e) {
                     e.printStackTrace();
+                    Log.i("jrkim", "날씨정보 획득 예외 발생!");
                     success = false;
                 }
 
@@ -379,12 +386,16 @@ public class MtInfo_General {
                 }
                 */
 
+                weatherloading = false;
+                weatherinfo = success;
+
                 if(cardview != null) {
                     cardview.weatherCompleted();
                 }
-                weatherloading = false;
-                if(success)
-                    weatherinfo = true;
+                if(infoCard != null) {
+                    infoCard.weatherCompleted();
+                }
+
             }
         }.start();
     }
@@ -449,6 +460,9 @@ public class MtInfo_General {
 
                 if(cardview != null) {
                     cardview.downloadCompleted();
+                }
+                if(infoCard != null) {
+                    infoCard.downloadCompleted();
                 }
 
                 loading = false;

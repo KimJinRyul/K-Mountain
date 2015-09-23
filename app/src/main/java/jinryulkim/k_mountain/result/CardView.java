@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -105,16 +106,24 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
     }
 
     private void setWeatherInfo(boolean animation) {
+        Log.i("jrkim", "setWeatherInfo");
+        findViewById(R.id.ivWeatherProgress).clearAnimation();
+        findViewById(R.id.ivWeatherProgress).setVisibility(View.GONE);
+
+        if(mInfo.weatherinfo == false || mInfo.todaysWeather == null || mInfo.arrWeathers == null || mInfo.arrWeathers.size() != 5) {
+            findViewById(R.id.tvWeatherLoading).setVisibility(View.VISIBLE);
+            ((TextView)findViewById(R.id.tvWeatherLoading)).setText(R.string.RESULT_WEATHER_ERROR);
+            Log.i("jrkim", "못 얻... 끝-");
+            return;
+        }
+
+        Log.i("jrkim", "얻었당~");
+        findViewById(R.id.tvWeatherLoading).setVisibility(View.GONE);
 
         Calendar cal = Calendar.getInstance();
         int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);   // 오늘 날짜
         int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);      // 일요일 = 1
         int lastDay = cal.getActualMaximum(Calendar.DATE);  // 이번달 마지막 날
-
-
-        findViewById(R.id.ivWeatherProgress).clearAnimation();
-        findViewById(R.id.ivWeatherProgress).setVisibility(View.GONE);
-        findViewById(R.id.tvWeatherLoading).setVisibility(View.GONE);
 
         findViewById(R.id.rlTodaysWeather).setBackgroundResource(CommonUtils.getWeatherIconResId(mInfo.todaysWeather.id));
         ((TextView)findViewById(R.id.tvCurrentTemp)).setText(mInfo.todaysWeather.tempDay + "°C");
@@ -229,7 +238,10 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
     }
 
     private void init(MtInfo_General info, boolean swipe, int listType) {
+        mHandler.removeMessages(MESSAGE_IMAGE_DOWNLOADED);
         mHandler.removeMessages(MESSAGE_WEATHER_DOWNLOADED);
+
+        Log.i("jrkim", "CardView.init");
 
         mInfo = info;
         mListType = listType;
@@ -297,8 +309,10 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
             }
 
             if(mInfo.weatherinfo == true) {
+                Log.i("jrkim", "날씨... 이미 있넹.");
                 setWeatherInfo(false);
             } else {
+                Log.i("jrkim", "날씨... 없당...");
                 findViewById(R.id.rlTodaysWeather).setVisibility(GONE);
                 findViewById(R.id.ivWeatherProgress).startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate));
                 findViewById(R.id.ivWeatherProgress).setVisibility(VISIBLE);
