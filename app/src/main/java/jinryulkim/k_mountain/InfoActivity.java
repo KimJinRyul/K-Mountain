@@ -2,6 +2,7 @@ package jinryulkim.k_mountain;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 /**
  * Created by jinryulkim on 15. 9. 9..

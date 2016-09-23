@@ -518,9 +518,11 @@ public class CommonUtils {
         return res;
     }
 
-    public static void sendSMS(Context context, String number, String text) {
+    /*
+    public static void sendSMS(Context context, String number, String text, PendingIntent sendResult) {
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
         SmsManager smsManager = SmsManager.getDefault();
-        smsManager.sendTextMessage(number, null, text, null, null);
+        smsManager.sendTextMessage(number, null, text, sendResult, null);
     }
+    */
 }

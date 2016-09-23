@@ -1,6 +1,5 @@
 package jinryulkim.k_mountain;
 
-import android.app.Activity;
 import android.content.Intent;
 
 import android.content.SharedPreferences;
@@ -10,6 +9,7 @@ import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -27,7 +27,7 @@ import jinryulkim.k_mountain.My.MyActivity;
 import jinryulkim.k_mountain.help.HelpActivity;
 import jinryulkim.k_mountain.named100.Named100Activity;
 
-public class MainActivity extends Activity implements View.OnClickListener
+public class MainActivity extends AppCompatActivity implements View.OnClickListener
 {
     private final static String SHAREDPREFERENCE_NAME = "k_mountain";
     private final static String SP_DBVERSION = "db_version";

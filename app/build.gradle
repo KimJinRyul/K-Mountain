@@ -1,15 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.0"
-
+    compileSdkVersion 24
+    buildToolsVersion "23.0.3"
     defaultConfig {
         applicationId "jinryulkim.k_mountain"
         minSdkVersion 14
-        targetSdkVersion 23
-        versionCode 6
-        versionName "1.0.5"
+        targetSdkVersion 24
+        versionCode 9
+        versionName "1.0.8"
     }
     buildTypes {
         release {
@@ -17,11 +16,26 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    /*
+    signingConfigs {
+        release {
+            storeFile file("../keystore/kmt_keystore.jks");
+            storePassword "rlawlsdbf9978"
+            keyAlias "jinryul.kim"
+            keyPassword "rlawlsdbf9978"
+        }
+    }
+    */
+
+    productFlavors {
+    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.0.0'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.android.support:support-v4:24.2.1'
     compile files('libs/libDaumMapAndroid.jar')
     compile files('libs/shapefilereader-1.0.jar')
 }

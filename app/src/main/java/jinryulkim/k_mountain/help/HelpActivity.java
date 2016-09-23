@@ -2,17 +2,27 @@ package jinryulkim.k_mountain.help;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.telephony.SmsManager;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.Toast;
@@ -30,7 +40,7 @@ import jinryulkim.k_mountain.R;
 /**
  * Created by jinryulkim on 15. 9. 18..
  */
-public class HelpActivity extends Activity implements View.OnClickListener {
+public class HelpActivity extends AppCompatActivity implements View.OnClickListener {
 
     private LocationManager mLocationManager = null;
     private boolean mbGPSProvider = false;
@@ -40,9 +50,12 @@ public class HelpActivity extends Activity implements View.OnClickListener {
     private String mOldAddress = "";
     private String mNewAddress = "";
 
+    private final static int PERMISSION_REQCODE_LOCATION = 1;
+
     private final static int MESSAGE_GETADDRESS = 1000;
+
     public void handleMessage(Message msg) {
-        switch(msg.what) {
+        switch (msg.what) {
             case MESSAGE_GETADDRESS:
                 findViewById(R.id.btnFire).setEnabled(true);
                 findViewById(R.id.btnHelpMe).setEnabled(true);
@@ -52,25 +65,29 @@ public class HelpActivity extends Activity implements View.OnClickListener {
     }
 
     private static HelpHandler mHandler = null;
+
     static class HelpHandler extends Handler {
         private final WeakReference<HelpActivity> mActivity;
+
         HelpHandler(HelpActivity activity) {
-            mActivity = new WeakReference<HelpActivity>(activity);
+            mActivity = new WeakReference<>(activity);
         }
 
         @Override
         public void handleMessage(Message msg) {
             HelpActivity activity = mActivity.get();
-            if(activity != null)
+            if (activity != null)
                 activity.handleMessage(msg);
         }
-    };
+    }
+
+    ;
 
     private LocationListener mLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
             mCurrentLocation = location;
-            if(mCurrentLocation != null) {
+            if (mCurrentLocation != null) {
                 requestAddress();
             }
         }
@@ -93,17 +110,20 @@ public class HelpActivity extends Activity implements View.OnClickListener {
     };
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                    checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, getString(R.string.TOAST_HELP_NO_PERMISSION), Toast.LENGTH_SHORT).show();
-                finish();
-            }
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResult) {
+        switch (requestCode) {
+            case PERMISSION_REQCODE_LOCATION:
+                if (grantResult.length > 0 && grantResult[0] == PackageManager.PERMISSION_GRANTED && grantResult[1] == PackageManager.PERMISSION_GRANTED) {
+                    init();
+                } else {
+                    Toast.makeText(this, getString(R.string.TOAST_HELP_NO_PERMISSION), Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                break;
         }
+    }
 
+    private void init() {
         setContentView(R.layout.activity_119);
 
         mHandler = new HelpHandler(this);
@@ -120,14 +140,37 @@ public class HelpActivity extends Activity implements View.OnClickListener {
         mbGPSProvider = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         mbNETProvider = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-        if(!mbGPSProvider && !mbNETProvider) {
+        if (!mbGPSProvider && !mbNETProvider) {
             DialogActivity.launchDialog(this, DialogActivity.DLGTYPE_GPSOFF, REQCODE_GPSOFF);
         }
 
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 10, mLocationListener);
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 10, mLocationListener);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, getString(R.string.TOAST_HELP_NO_PERMISSION), Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 10, mLocationListener);
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, mLocationListener);
 
         showProgress();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+           ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
+            init();
+        } else {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String [] { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.SEND_SMS},
+                    PERMISSION_REQCODE_LOCATION
+            );
+        }
     }
 
     @Override
@@ -159,11 +202,10 @@ public class HelpActivity extends Activity implements View.OnClickListener {
         String strMessage = getString(R.string.TOAST_NO_GPS);
 
         boolean bHaveNoPermission = false;
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                    checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                bHaveNoPermission = true;
-            }
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            bHaveNoPermission = true;
         }
 
         if(mCurrentLocation == null && (mbGPSProvider || mbNETProvider)) {
@@ -177,12 +219,15 @@ public class HelpActivity extends Activity implements View.OnClickListener {
             }
         }
 
+
+
         switch(v.getId()) {
             case R.id.btnFire:
                 if(mCurrentLocation != null) {
                     strMessage = String.format(getString(R.string.HELP_FIRE_MESSAGE),
                             mCurrentLocation.getLatitude() + "", mCurrentLocation.getLongitude() + "", mNewAddress.length() > 0 ? mNewAddress : mOldAddress);
-                    CommonUtils.sendSMS(this, "119", strMessage);
+                    Log.i("jrkim", strMessage);
+                    sendSMS("119", strMessage);
                     finish();
                 } else {
                     Toast.makeText(this, strMessage, Toast.LENGTH_SHORT).show();
@@ -192,7 +237,8 @@ public class HelpActivity extends Activity implements View.OnClickListener {
                 if(mCurrentLocation != null) {
                     strMessage = String.format(getString(R.string.HELP_SAFE_MESSAGE),
                             mCurrentLocation.getLatitude() + "", mCurrentLocation.getLongitude() + "", mNewAddress.length() > 0 ? mNewAddress : mOldAddress);
-                    CommonUtils.sendSMS(this, "119", strMessage);
+                    Log.i("jrkim", strMessage);
+                    sendSMS("119", strMessage);
                     finish();
                 } else {
                     Toast.makeText(this, strMessage, Toast.LENGTH_SHORT).show();
@@ -200,6 +246,44 @@ public class HelpActivity extends Activity implements View.OnClickListener {
                 break;
         }
     }
+
+    public void sendSMS(String number, String text) {
+
+
+        Log.i("jrkim", "sendSMS : " + number);
+        /*PendingIntent sentIntent = PendingIntent.getBroadcast(this, 0, new Intent("SMS_SENT_ACTION"), 0);
+        PendingIntent deliveredIntent = PendingIntent.getBroadcast(this, 0, new Intent("SMS_DELIVERED_ACTION"), 0);
+
+        registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.i("jrkim", "onReceive - sent:" + getResultCode());
+                switch (getResultCode()) {
+
+                }
+            }
+        }, new IntentFilter("SMS_SENT_ACTION"));
+
+        registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.i("jrkim", "onReceive - delivered:" + getResultCode());
+                switch(getResultCode()) {
+
+                }
+            }
+        }, new IntentFilter("SMS_+DELIVERED_ACTION"));
+
+        SmsManager smsManager = SmsManager.getDefault();
+        smsManager.sendTextMessage(number, null, text, sentIntent, deliveredIntent);
+        */
+
+        Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:" + number));
+        intent.putExtra("sms_body", text);
+        startActivity(intent);
+
+    }
+
 
     private void requestAddress() {
         new Thread() {
@@ -226,9 +310,9 @@ public class HelpActivity extends Activity implements View.OnClickListener {
                         }
 
                         strXML = strXML.substring(strXML.indexOf("<old><name value="));
-                        mOldAddress = strXML.substring(18, strXML.indexOf("/>") - 1);
+                        mOldAddress = strXML.substring(18, strXML.indexOf("/>") - 1).replaceAll("\'", "").trim();
                         strXML = strXML.substring(strXML.indexOf("<new><name value="));
-                        mNewAddress = strXML.substring(18, strXML.indexOf("/>") - 1);
+                        mNewAddress = strXML.substring(18, strXML.indexOf("/>") - 1).replaceAll("\'", "").trim();
 
                         br.close();
                         mHandler.sendEmptyMessage(MESSAGE_GETADDRESS);

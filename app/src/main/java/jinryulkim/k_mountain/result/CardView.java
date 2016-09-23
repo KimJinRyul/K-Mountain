@@ -314,9 +314,19 @@ public class CardView extends RelativeLayout implements View.OnClickListener {
             } else {
                 Log.i("jrkim", "날씨... 없당...");
                 findViewById(R.id.rlTodaysWeather).setVisibility(GONE);
-                findViewById(R.id.ivWeatherProgress).startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate));
                 findViewById(R.id.ivWeatherProgress).setVisibility(VISIBLE);
-                mInfo.requestWeatherInfo(mContext);
+                findViewById(R.id.tvWeatherLoading).setVisibility(VISIBLE);
+                ((TextView)findViewById(R.id.tvWeatherLoading)).setText(R.string.CARD_WEATHER);
+                findViewById(R.id.ivWeatherProgress).setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        v.setOnClickListener(null);
+                        ((TextView)findViewById(R.id.tvWeatherLoading)).setText(R.string.RESULT_WEATHER_LOADING);
+                        findViewById(R.id.ivWeatherProgress).startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate));
+                        mInfo.requestWeatherInfo(mContext);
+                    }
+                });
+                //mInfo.requestWeatherInfo(mContext);
             }
 
             findViewById(R.id.btnDetail).setOnClickListener(this);

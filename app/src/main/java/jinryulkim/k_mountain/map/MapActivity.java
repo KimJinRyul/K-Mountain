@@ -12,10 +12,15 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import net.daum.mf.map.api.MapPOIItem;
@@ -42,7 +47,9 @@ import jinryulkim.k_mountain.R;
 /**
  * Created by jinryulkim on 15. 9. 3..
  */
-public class MapActivity extends Activity {
+public class MapActivity extends AppCompatActivity {
+
+    private final static int PERMISSION_REQCODE_LOCATION = 1;
 
     public final static String EXTRA_INFO_POS = "extra_info_pos";
     private MtInfo_General mInfo = null;
@@ -151,8 +158,20 @@ public class MapActivity extends Activity {
     };
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResult) {
+        switch (requestCode) {
+            case PERMISSION_REQCODE_LOCATION:
+                if (grantResult.length > 0 && grantResult[0] == PackageManager.PERMISSION_GRANTED) {
+                    init();
+                } else {
+                    Toast.makeText(this, getString(R.string.TOAST_HELP_NO_PERMISSION), Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                break;
+        }
+    }
+
+    private void init() {
         setContentView(R.layout.activity_map);
 
         int position = getIntent().getIntExtra(EXTRA_INFO_POS, -1);
@@ -368,12 +387,12 @@ public class MapActivity extends Activity {
                             mbNETProvider = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
                             if (mbNETProvider) {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                    if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                                            checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                                        break;
-                                    }
+
+                                if (ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                                    ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                                    break;
                                 }
+
                                 Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                                 if (location != null) {
                                     makeMyPoint(location);
@@ -381,12 +400,11 @@ public class MapActivity extends Activity {
                             }
 
                             if (mbGPSProvider) {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                    if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                                            checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                                        break;
-                                    }
+                                if (ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                                    ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                                    break;
                                 }
+
                                 Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                                 if (location != null) {
                                     makeMyPoint(location);
@@ -481,6 +499,21 @@ public class MapActivity extends Activity {
         });
     }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            init();
+        } else {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String [] { Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSION_REQCODE_LOCATION
+            );
+        }
+    }
+
     private void removeMyPoint() {
         MapPOIItem [] items = mapView.getPOIItems();
         if(items != null) {
@@ -524,12 +557,11 @@ public class MapActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
+        if (ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
         }
+
         LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
         lm.removeUpdates(mLocationListener);
     }

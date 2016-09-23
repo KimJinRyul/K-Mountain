@@ -140,10 +140,14 @@ public class MtInfo_General {
         return true;
     }
 
-    private final static String todayURL = "http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&units=metric";
-    private final static String forecastURL = "http://api.openweathermap.org/data/2.5/forecast/daily?lat=%s&lon=%s&cnt=5&units=metric";
+    private final static String todayURL = "http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&units=metric&APPID=%s";
+    private final static String forecastURL = "http://api.openweathermap.org/data/2.5/forecast/daily?lat=%s&lon=%s&cnt=5&units=metric&APPID=%s";
+    private final static String apiKey = "516768bfe984b1ffb3877415227e5568";
 
     public void requestWeatherInfo(final Context context) {
+
+        Log.i("jrkim", "requestWeatherInfo");
+
         if(weatherloading == true || weatherinfo == true) {
             return;
         }
@@ -173,8 +177,12 @@ public class MtInfo_General {
 
                     if (bMatched == true) {
 
+                        Log.i("jrkim", "matched");
                         // 오늘 예보
-                        String addr = String.format(todayURL, citySplit[1], citySplit[2]);
+                        String addr = String.format(todayURL, citySplit[1], citySplit[2], apiKey);
+
+                        Log.i("jrkim", addr);
+
                         URL url = new URL(addr);
                         BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
                         String line;
@@ -184,6 +192,8 @@ public class MtInfo_General {
                         }
                         reader.close();
                         JSON = JSON.trim();
+
+                        Log.i("jrkim", JSON);
 
                         JSONObject jsonObj = new JSONObject(JSON);
                         JSONArray jsonArr;
@@ -262,7 +272,9 @@ public class MtInfo_General {
 
 
                         // 5일 예보
-                        addr = String.format(forecastURL, citySplit[1], citySplit[2]);
+                        addr = String.format(forecastURL, citySplit[1], citySplit[2], apiKey);
+                        Log.i("jrkim", addr);
+
                         url = new URL(addr);
                         reader = new BufferedReader(new InputStreamReader(url.openStream()));
 
@@ -273,6 +285,8 @@ public class MtInfo_General {
                         reader.close();
 
                         JSON = JSON.trim();
+
+                        Log.i("jrkim", JSON);
 
                         jsonObj = new JSONObject(JSON);
                         jsonArr = jsonObj.getJSONArray("list");
